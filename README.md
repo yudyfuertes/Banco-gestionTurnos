@@ -1,17 +1,5 @@
 SISTEMA DISTRIBUIDO DE GESTION DE TURNOS BANCARIOS
 
-Diseño de arquitectura de microservicios para la gestión de turnos y atención al cliente en sucursales bancarias.
-
-TABLA DE CONTENIDOS
-
-1. Entender el Problema
-2. Identificar los Servicios
-3. Base de Datos
-4. Usuarios y Roles
-5. Fallas y Riesgos
-6. Revisión de Diseño: Plataforma de Reservas de Hoteles
-
-
 1. ENTENDER EL PROBLEMA
 
 ¿Qué problema resuelve el sistema?
