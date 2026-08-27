@@ -53,3 +53,23 @@ Cada uno de los servicios presentados anteriormente puede trabajar de manera ind
 
 -	El registro de un cliente no depende de que una ventanilla este libre.
 -	Una notificación puede reintentarse sin afectar la asignación de turnos.
+PARTE 5 – BASE DE DATOS
+Paso 5: Datos del sistema
+¿Qué información debe guardarse?
+•	Clientes: Cédula, nombre, tipo de trámite solicitado.
+•	Turnos: Número de turno, categoría/prioridad, estado (en espera, llamado, atendido, cancelado), marca de tiempo.
+•	Ventanillas: Identificador de ventanilla, cajero asignado, estado (libre u ocupada).
+•	Notificaciones: Historial de avisos enviados y su estado de entrega.
+¿Qué datos son críticos?: El número de turno, su estado y el orden de la cola son críticos: un error aquí implica atender a un cliente fuera de turno. Los datos del cliente (cédula) también son sensibles y deben protegerse.
+¿Qué pasaría si se pierden? Se perdería la trazabilidad de quién debía ser atendido y en qué orden, generando reclamos y posible pérdida de confianza del cliente; por eso se recomienda respaldo periódico (backup) y replicación de la base de datos de Turnos
+Pregunta clave: ¿una base de datos compartida o una por servicio?: Cada microservicio tendrá su propia base de datos (bd_turnos, bd_clientes, bd_ventanillas, bd_notificaciones), evitando el acoplamiento que se genera cuando varios servicios comparten una sola base de datos y permitiendo que cada uno evolucione su esquema de forma independiente. La comunicación entre servicios se hace exclusivamente a través de sus APIS REST, nunca accediendo directamente a la base de datos de otro servicio.
+
+PARTE 6 – USUARIOS Y ROLES
+Paso 6: Identificar usuarios
+¿Que usará el sistema?
+•	Cliente: Solicita un turno y consulta su posición en la fila; no puede modificar el estado de otros turnos.
+•	Cajero / Asesor (operador): Llama al siguiente turno, marca la atención como finalizada o cancelada.
+•	Administrador de sucursal: Crea y edita ventanillas, consulta reportes de tiempos de espera, reasigna las prioridades.
+•	Sistema de autoservicio: Actúa como cliente automatizado que genera turnos desde la sucursal física.
+Pregunta clave: ¿todos pueden hacer lo mismo? No, se manejan permisos diferenciados por el rol, el cliente solo lee o crea su propio turno, el cajero solo gestiona los turnos asignados a su ventanilla y solo el administrador tiene permisos de configuración del sistema.
+
