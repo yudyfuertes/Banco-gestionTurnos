@@ -48,6 +48,65 @@ Cada uno de los servicios presentados anteriormente puede trabajar de manera ind
 El registro de un cliente no depende de que una ventanilla este libre.
 Una notificación puede reintentarse sin afectar la asignación de turnos.
 
+**PARTE 3 – ¿CÓMO SE COMUNICAN?**
+
+Paso 3: Conexión entre servicios
+
+¿Qué servicio necesita información de otro?
+
+●   Turnos necesita información de Clientes para identificar al cliente y asociar sus datos al turno.
+●   Turnos necesita información de Asesores para saber qué ventanilla está disponible y asignar el turno.
+●   Notificaciones necesita información de Turnos para saber qué turno debe notificar, cuándo será atendido y en qué ventanilla.
+●   Asesores necesita información de Turnos para conocer el turno que debe atender y registrar el cierre de la atención
+
+¿Quién solicita datos?
+El servicio que necesita la información es el que realiza la solicitud.
+●   Turnos solicita → Clientes
+●   Turnos solicita → Asesores
+●   Notificaciones solicita → Turnos
+●   Asesores solicita → Turnos
+
+¿Quién responde?
+●   Turnos → solicita → Clientes
+●   Clientes → responde → Turnos
+●   Turnos → solicita → Asesores
+●   Asesores → responde → Turnos
+●   Notificaciones → solicita → Turnos
+●   Turnos → responde → Notificaciones
+●   Asesores → solicita → Turnos
+●   Turnos → responde → Asesores
+
+Comunicación durante la atención
+Cuando un turno es asignado y atendido:
+●   Turnos → informa → Asesores: qué turno debe ser atendido.
+●   Asesores → informa → Turnos: que el turno fue atendido y registra el cierre de atención.
+●   Turnos → informa → Notificaciones: cuándo el turno va a ser atendido y en qué ventanilla.
+●   Notificaciones → informa → Cliente: que su turno será atendido.
+
+**PARTE 4 – ELEGIR LA ARQUITECTURA**
+
+Paso 4: Tipo de arquitectura
+
+Arquitectura: Microservicios
+
+Preguntas guía:
+
+¿Cuántos usuarios tendrá el sistema?
+
+Tendrá una cantidad limitada de usuarios, principalmente clientes y empleados que utilizarán el sistema para gestionar y atender los turnos.
+
+¿Necesita escalar?
+
+Por ahora no necesita una gran escalabilidad, pero en el futuro podría ampliarse para soportar más usuarios, ventanillas, sucursales y servicios.
+
+¿Es un sistema pequeño o grande?
+
+Actualmente es un sistema pequeño, ya que cuenta con cuatro servicios principales: Turnos, Clientes, Asesores y Notificaciones. Sin embargo, puede crecer en el futuro agregando nuevas funcionalidades o nuevos servicios.
+
+Justifiquen su elección:
+
+Elegimos la arquitectura de microservicios porque el sistema está dividido en servicios independientes, donde cada uno cumple una función específica. Esto permite que los servicios se comuniquen entre sí y facilita la organización del sistema. Además, si en el futuro aumenta la cantidad de usuarios o se necesitan nuevas funcionalidades, se pueden ampliar o agregar servicios sin tener que modificar todo el sistema
+
 **PARTE 5 – BASE DE DATOS**
 
 Paso 5: Datos del sistema
@@ -127,4 +186,4 @@ Punto único de fallo en Disponibilidad: Si el servicio de Disponibilidad deja d
 
 Confirmar si el diseño tiene sentido
 
-El diseño propuesto sí tiene sentido para una plataforma de reservas de hoteles, porque el sistema puede dividirse en diferentes servicios con responsabilidades específicas, como Usuarios, Autenticación, Hoteles, Disponibilidad, Reservas, Notificaciones y Reseñas. Sin embargo, se deben tener en cuenta los posibles problemas mencionados anteriormente, especialmente la comunicación entre servicios y la consistencia de los datos cuando cada microservicio maneja su propio almacenamiento. Por ejemplo, si un usuario cancela una reserva y el servicio de Reservas actualiza correctamente la información, pero la comunicación con el servicio de Notificaciones falla, este podría no recibir la información de la cancelación y mantener datos desactualizados. A partir de lo anterior, se pueden incluir las mejoras y correcciones mencionadas anteriormente, con el fin de hacer que el diseño sea más claro, coherente y adecuado para una arquitectura de microservicios. En conclusión, la propuesta es coherente con una arquitectura de microservicios, ya que permite dividir el sistema en servicios independientes que pueden escalar y evolucionar de manera individual. Sin embargo, es importante definir correctamente las responsabilidades de cada servicio, la comunicación entre ellos, el manejo de los datos, el API Gateway y, si aplica, el servicio de Pagos, para reducir posibles fallos en el funcionamiento del sistema.
+El diseño propuesto sí tiene sentido para una plataforma de reservas de hoteles, porque el sistema puede dividirse en diferentes servicios con responsabilidades específicas, como Usuarios, Autenticación, Hoteles, Disponibilidad, Reservas, Notificaciones y Reseñas. Sin embargo, se deben tener en cuenta los posibles problemas mencionados anteriormente, especialmente la comunicación entre servicios y la consistencia de los datos cuando cada microservicio maneja su propio almacenamiento. Por ejemplo, si un usuario cancela una reserva y el servicio de Reservas actualiza correctamente la información, pero la comunicación con el servicio de Notificaciones falla, este podría no recibir la información de la cancelación y mantener datos desactualizados. A partir de lo anterior, se pueden incluir las mejoras y correcciones mencionadas anteriormente, con el fin de hacer que el diseño sea más claro, coherente y adecuado para una arquitectura de microservicios. En conclusión, la propuesta es coherente con una arquitectura de microservicios, ya que permite dividir el sistema en servicios independientes que pueden escalar y evolucionar de manera individual. Sin embargo, es importante definir correctamente las
