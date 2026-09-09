@@ -1,0 +1,29 @@
+services:
+  home:
+    build: ./home
+    ports:
+      - "8080:80"
+
+  # clientes-service:
+  #   build: ./servicios/clientes
+  #   ports:
+  #     - "3000:80"
+
+  # turnos-service:
+  #   build: ./servicios/turnos
+  #   ports:
+  #     - "3001:80"
+  #   depends_on:
+  #     - clientes-service
+
+  # asesores-service:
+  #   build: ./servicios/asesores
+  #   ports:
+  #     - "3002:80"
+
+  # notificaciones-service:
+  #   build: ./servicios/notificaciones
+  #   ports:
+  #     - "3003:80"
+  #   depends_on:
+  #     - turnos-service
