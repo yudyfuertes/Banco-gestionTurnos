@@ -27,6 +27,15 @@ Diseñar la estructura inicial de un sistema distribuido para la gestión de tur
 - Yudy Alexandra Fuertes Cuasapud
 
 ---
+## Roles preliminares:
+Líder del proyecto = Valeria Sanchez 
+Encargado de documentación = Yudy Fuertes. 
+Encargado técnico = Elizabeth Pinto
+Encargado de presentación = Fernanda Collazos.
+
+## Arquitectura del sistema
+
+<img width="719" height="512" alt="Arquitectura" src="https://github.com/user-attachments/assets/2c993669-e541-4c69-8f89-fbcdb978b1a7" />
 
 # PARTE 1 — ENTENDER EL PROBLEMA
 
