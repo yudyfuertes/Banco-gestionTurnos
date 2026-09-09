@@ -37,6 +37,13 @@ Encargado de presentación = Fernanda Collazos.
 
 <img width="719" height="512" alt="Arquitectura" src="https://github.com/user-attachments/assets/2c993669-e541-4c69-8f89-fbcdb978b1a7" />
 
+## Definición de servicios
+| Servicio | Responsabilidad | ¿Qué información maneja? | ¿Con qué otros servicios se comunicará? |
+|---|---|---|---|
+| **Turnos** | Genera el número de turno, define la cola por tipo de servicio y prioridad. | Tipo de trámite y prioridad. | **Clientes:** para identificar al cliente y asociar sus datos al turno.<br>**Asesores:** para saber qué ventanilla está disponible y asignar el turno. |
+| **Clientes** | Registra y valida los datos del cliente (tipo de documento, número de documento, celular, tipo de trámite). | Información del cliente (nombre, tipo de documento, número de documento, celular, tipo de trámite). | **Turnos:** le solicita la creación del turno con los datos del cliente y recibe la confirmación con el número de turno generado. |
+| **Asesores** | Gestiona el estado de cada ventanilla (disponible/ocupada), asigna el turno al asesor. | Información de estado de ventanilla (disponible/ocupada). | **Turnos:** para conocer el turno que debe atender y registrar el cierre de la atención. |
+| **Notificaciones** | Informa al cliente cuando su turno va a ser atendido y en qué ventanilla. | Información del estado del turno, y a dónde dirigirse. | **Turnos:** para saber qué turno debe notificar, cuándo será atendido y en qué ventanilla.<br>**Clientes:** llega al cliente la notificación cuando será atendido. |
 # PARTE 1 — ENTENDER EL PROBLEMA
 
 ## Paso 1: Responder juntos
