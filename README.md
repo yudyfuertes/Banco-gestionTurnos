@@ -55,8 +55,16 @@ imagen
 <img width="1150" height="230" alt="image" src="https://github.com/user-attachments/assets/1601c6b8-fc66-4152-8dcc-aa207390e5a8" />
 Home funcionando 
 <img width="986" height="487" alt="image" src="https://github.com/user-attachments/assets/6c7b4de7-d074-4c4e-863c-ebcb021cba7e" />
-## docker-compose
+
+## Docker Compose
+
+El proyecto utiliza Docker Compose para definir y administrar los contenedores correspondientes a los diferentes microservicios del sistema Q-bank.
+
+Actualmente, el archivo `docker-compose.yml` tiene definida la estructura de los cinco servicios principales:
+
+```yaml
 services:
+
   home:
     build: ./home
     ports:
@@ -85,14 +93,77 @@ services:
   #     - "3003:80"
   #   depends_on:
   #     - turnos-service
+```
 
-## Pull request:
-Estado actual
-Diseñado: Arquitectura completa, definición de servicios, endpoints propuestos con métodos HTTP, comunicación entre servicios.
-Configurado: Estructura de docker-compose.yml con los 5 servicios reconocidos por Docker compose.
-Implementado: vista Home funcionando dentro de un contenedor (Dockerfile con nginx:alpine).
-Pendiente: lógica de negocio de los servicios Clientes, Turnos, Asesores y Notificaciones; base de datos turnos-db, asesores-db, clientes-db, notificaciones-db; comunicación HTTP entre servicios.
+### Servicios configurados
 
+| Servicio       | Puerto | Estado       |
+| -------------- | -----: | ------------ |
+| Home           |   8080 | Implementado |
+| Clientes       |   3000 | Pendiente    |
+| Turnos         |   3001 | Pendiente    |
+| Asesores       |   3002 | Pendiente    |
+| Notificaciones |   3003 | Pendiente    |
+
+El servicio Home se encuentra actualmente implementado mediante un `Dockerfile` basado en la imagen `nginx:alpine`.
+
+---
+
+## Estado actual del proyecto
+
+### Diseñado
+
+* Arquitectura completa del sistema.
+* Definición de los microservicios.
+* Responsabilidades de cada servicio.
+* Endpoints propuestos y métodos HTTP.
+* Comunicación propuesta entre los diferentes servicios.
+
+### Configurado
+
+* Estructura inicial del archivo `docker-compose.yml`.
+* Definición de los cinco servicios principales:
+
+  * Home
+  * Clientes
+  * Turnos
+  * Asesores
+  * Notificaciones
+* Configuración inicial de puertos.
+* Configuración de dependencias entre servicios.
+
+### Implementado
+
+* Vista Home funcionando correctamente dentro de un contenedor Docker.
+* `Dockerfile` configurado utilizando la imagen `nginx:alpine`.
+* Construcción de la imagen Docker.
+* Ejecución del contenedor.
+* Acceso al Home mediante el puerto `8080`.
+
+### Pendiente
+
+* Implementación de la lógica de negocio del servicio Clientes.
+* Implementación de la lógica de negocio del servicio Turnos.
+* Implementación de la lógica de negocio del servicio Asesores.
+* Implementación de la lógica de negocio del servicio Notificaciones.
+* Implementación de las bases de datos:
+
+  * `clientes-db`
+  * `turnos-db`
+  * `asesores-db`
+  * `notificaciones-db`
+* Implementación de la comunicación HTTP entre los microservicios.
+* Integración completa de los servicios mediante Docker Compose.
+
+---
+
+## Pull Request
+
+### Resumen
+
+En este avance se establece la estructura inicial del sistema distribuido Q-bank, definiendo la arquitectura basada en microservicios y configurando la infraestructura inicial mediante Docker.
+
+Se implementó y puso en funcionamiento el servicio Home, mientras que los demás microservicios se encuentran definidos en `docker-compose.yml` y serán desarrollados en las siguientes etapas.
 
 # PARTE 1 — ENTENDER EL PROBLEMA
 
