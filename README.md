@@ -1,5 +1,46 @@
 # Banco-gestionTurnos
 
+# Primer avance del proyecto
+
+**Nombre del proyecto:** Q-bank
+
+## Problema que resuelve
+
+Actualmente, la gestión presencial de la atención al cliente en los modelos tradicionales de las entidades bancarias presenta fallas de organización debido a la concurrencia simultánea de usuarios que solicitan diferentes servicios especializados o simples. Esto genera:
+
+- **Filas presenciales abundantes:** Mayor cantidad de usuarios en horas pico sin control de flujo.
+- **Tiempos de espera inciertos:** No existen estimaciones en tiempo real para el usuario sobre el estado de su turno.
+- **Asignación ineficiente de asesores:** Asesores especializados atendiendo solicitudes simples.
+- **Ausencia de priorización:** Falta de priorización en la atención preferencial.
+
+Q-bank es un sistema diseñado para digitalizar y optimizar el flujo de atención presencial. En el momento en que el usuario llega al banco, toma un turno, el sistema lo registra y aplica un ordenamiento según la prioridad de su solicitud. Posteriormente, realiza automáticamente la asignación a una ventanilla disponible y notifica en tiempo real al usuario para indicarle el momento en que debe acercarse para ser atendido.
+
+## Objetivo
+
+Diseñar la estructura inicial de un sistema distribuido para la gestión de turnos bancarios, utilizando una arquitectura basada en microservicios.
+
+## Integrantes
+
+- Elizabeth Pinto Rebolledo
+- Alix Fernanda Collazos Sarria
+- Valeria Sanchez Pizo
+- Yudy Alexandra Fuertes Cuasapud
+
+---
+## Roles preliminares:
+Líder del proyecto = Valeria Sanchez 
+Encargado de documentación = Yudy Fuertes. 
+Encargado técnico = Elizabeth Pinto
+Encargado de presentación = Fernanda Collazos.
+
+## Arquitectura del sistema
+
+<img width="719" height="512" alt="Arquitectura" src="https://github.com/user-attachments/assets/2c993669-e541-4c69-8f89-fbcdb978b1a7" />
+
+# PARTE 1 — ENTENDER EL PROBLEMA
+
+## Paso 1: Responder juntos
+
 ## PARTE 1 — ENTENDER EL PROBLEMA
 
 ### Paso 1: Responder juntos
