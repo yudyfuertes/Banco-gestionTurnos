@@ -35,7 +35,7 @@ Encargado de presentación = Fernanda Collazos.
 
 ## Arquitectura del sistema
 
-<img width="719" height="512" alt="Arquitectura" src="https://github.com/user-attachments/assets/2c993669-e541-4c69-8f89-fbcdb978b1a7" />
+<img width="719" height="512" alt="Arquitectura" src="https://github.com/user-attachments/assets/16f62f5c-a132-4993-849a-13bd10e83c96" />
 
 ## Definición de servicios
 | Servicio | Responsabilidad | ¿Qué información maneja? | ¿Con qué otros servicios se comunicará? |
@@ -44,6 +44,10 @@ Encargado de presentación = Fernanda Collazos.
 | **Clientes** | Registra y valida los datos del cliente (tipo de documento, número de documento, celular, tipo de trámite). | Información del cliente (nombre, tipo de documento, número de documento, celular, tipo de trámite). | **Turnos:** le solicita la creación del turno con los datos del cliente y recibe la confirmación con el número de turno generado. |
 | **Asesores** | Gestiona el estado de cada ventanilla (disponible/ocupada), asigna el turno al asesor. | Información de estado de ventanilla (disponible/ocupada). | **Turnos:** para conocer el turno que debe atender y registrar el cierre de la atención. |
 | **Notificaciones** | Informa al cliente cuando su turno va a ser atendido y en qué ventanilla. | Información del estado del turno, y a dónde dirigirse. | **Turnos:** para saber qué turno debe notificar, cuándo será atendido y en qué ventanilla.<br>**Clientes:** llega al cliente la notificación cuando será atendido. |
+
+## Comunicación entre servicios
+
+<img width="718" height="779" alt="Comunicación" src="https://github.com/user-attachments/assets/870f42dd-283d-4f53-a48b-197d3bd4f7e4" />
 
 ## Dockerfile vista home
 contenedor 
