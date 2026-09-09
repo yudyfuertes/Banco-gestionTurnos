@@ -52,6 +52,44 @@ imagen
 <img width="1150" height="230" alt="image" src="https://github.com/user-attachments/assets/1601c6b8-fc66-4152-8dcc-aa207390e5a8" />
 Home funcionando 
 <img width="986" height="487" alt="image" src="https://github.com/user-attachments/assets/6c7b4de7-d074-4c4e-863c-ebcb021cba7e" />
+## docker-compose
+services:
+  home:
+    build: ./home
+    ports:
+      - "8080:80"
+
+  # clientes-service:
+  #   build: ./servicios/clientes
+  #   ports:
+  #     - "3000:80"
+
+  # turnos-service:
+  #   build: ./servicios/turnos
+  #   ports:
+  #     - "3001:80"
+  #   depends_on:
+  #     - clientes-service
+
+  # asesores-service:
+  #   build: ./servicios/asesores
+  #   ports:
+  #     - "3002:80"
+
+  # notificaciones-service:
+  #   build: ./servicios/notificaciones
+  #   ports:
+  #     - "3003:80"
+  #   depends_on:
+  #     - turnos-service
+
+## Pull request:
+Estado actual
+Diseñado: Arquitectura completa, definición de servicios, endpoints propuestos con métodos HTTP, comunicación entre servicios.
+Configurado: Estructura de docker-compose.yml con los 5 servicios reconocidos por Docker compose.
+Implementado: vista Home funcionando dentro de un contenedor (Dockerfile con nginx:alpine).
+Pendiente: lógica de negocio de los servicios Clientes, Turnos, Asesores y Notificaciones; base de datos turnos-db, asesores-db, clientes-db, notificaciones-db; comunicación HTTP entre servicios.
+
 
 # PARTE 1 — ENTENDER EL PROBLEMA
 
