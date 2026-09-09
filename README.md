@@ -34,8 +34,7 @@ Encargado técnico = Elizabeth Pinto
 Encargado de presentación = Fernanda Collazos.
 
 ## Arquitectura del sistema
-
-<img width="719" height="512" alt="Arquitectura" src="https://github.com/user-attachments/assets/16f62f5c-a132-4993-849a-13bd10e83c96" />
+<img width="719" height="512" alt="Primeravance" src="https://github.com/user-attachments/assets/5cfd9d1f-d972-449b-a3ad-61491e6517cb" />
 
 ## Definición de servicios
 | Servicio | Responsabilidad | ¿Qué información maneja? | ¿Con qué otros servicios se comunicará? |
