@@ -1,0 +1,462 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f5f8fc;
+    color: #172b4d;
+}
+
+/* =========================
+   HEADER
+========================== */
+
+header {
+    background-color: #ffffff;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 25px;
+    font-weight: bold;
+    color: #0756a3;
+}
+
+.logo-icon {
+    width: 42px;
+    height: 42px;
+    background-color: #0756a3;
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+nav {
+    display: flex;
+    gap: 30px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #45566f;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+nav a:hover {
+    color: #0756a3;
+}
+
+/* =========================
+   HERO
+========================== */
+
+.hero {
+    min-height: 570px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+    padding: 70px 8%;
+    background: linear-gradient(
+        135deg,
+        #eef6ff 0%,
+        #ffffff 55%,
+        #e8f2ff 100%
+    );
+}
+
+.hero-content {
+    max-width: 600px;
+}
+
+.badge {
+    display: inline-block;
+    background-color: #dceeff;
+    color: #0756a3;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 52px;
+    line-height: 1.1;
+    margin-bottom: 22px;
+    color: #12345b;
+}
+
+.hero h1 span {
+    color: #0876d1;
+}
+
+.hero p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #607086;
+    margin-bottom: 30px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 14px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.btn-primary {
+    background-color: #0756a3;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: #0756a3;
+    border: 1px solid #c9d9ea;
+}
+
+/* =========================
+   TARJETA VISUAL
+========================== */
+
+.hero-card {
+    width: 400px;
+    background-color: white;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 15px 40px rgba(24, 71, 120, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.card-header h3 {
+    font-size: 18px;
+    color: #1d3557;
+}
+
+.status {
+    color: #159447;
+    background-color: #e5f8ec;
+    padding: 6px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.turn-number {
+    text-align: center;
+    background-color: #f1f7fd;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.turn-number small {
+    color: #718096;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.turn-number strong {
+    font-size: 55px;
+    color: #0756a3;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #edf1f5;
+    font-size: 14px;
+}
+
+.info:last-child {
+    border-bottom: none;
+}
+
+.info span:first-child {
+    color: #718096;
+}
+
+.info span:last-child {
+    font-weight: bold;
+    color: #263b55;
+}
+
+/* =========================
+   SERVICIOS
+========================== */
+
+.services {
+    padding: 75px 8%;
+    background-color: white;
+    text-align: center;
+}
+
+.section-title {
+    max-width: 700px;
+    margin: 0 auto 45px;
+}
+
+.section-title h2 {
+    font-size: 34px;
+    color: #17395f;
+    margin-bottom: 12px;
+}
+
+.section-title p {
+    color: #718096;
+    line-height: 1.6;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+}
+
+.service-card {
+    padding: 30px 22px;
+    border: 1px solid #e4ebf3;
+    border-radius: 14px;
+    background-color: #ffffff;
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.service-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background-color: #e7f2ff;
+    color: #0756a3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+    margin-bottom: 20px;
+}
+
+.service-card h3 {
+    margin-bottom: 12px;
+    color: #1d3c5e;
+    font-size: 18px;
+}
+
+.service-card p {
+    color: #718096;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* =========================
+   COMO FUNCIONA
+========================== */
+
+.process {
+    padding: 75px 8%;
+    background-color: #f5f8fc;
+    text-align: center;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.step {
+    background-color: white;
+    padding: 30px;
+    border-radius: 14px;
+    position: relative;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 18px;
+    background-color: #0756a3;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.step h3 {
+    margin-bottom: 10px;
+    color: #203e60;
+}
+
+.step p {
+    color: #718096;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* =========================
+   EQUIPO
+========================== */
+
+.team {
+    padding: 75px 8%;
+    background-color: white;
+    text-align: center;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.member {
+    padding: 25px 15px;
+    border: 1px solid #e4ebf3;
+    border-radius: 12px;
+}
+
+.avatar {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    background-color: #dceeff;
+    color: #0756a3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.member h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #263f5c;
+}
+
+.member p {
+    font-size: 13px;
+    color: #8794a5;
+}
+
+/* =========================
+   FOOTER
+========================== */
+
+footer {
+    background-color: #12345b;
+    color: white;
+    padding: 35px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+footer p {
+    color: #b9c9db;
+    font-size: 14px;
+}
+
+.footer-logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* =========================
+   RESPONSIVE
+========================== */
+
+@media (max-width: 900px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-buttons {
+        justify-content: center;
+    }
+
+    .services-grid,
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hero-card {
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
+@media (max-width: 600px) {
+    header {
+        padding: 0 5%;
+    }
+
+    nav {
+        display: none;
+    }
+
+    .hero {
+        padding: 50px 5%;
+    }
+
+    .hero h1 {
+        font-size: 38px;
+    }
+
+    .services,
+    .process,
+    .team {
+        padding: 55px 5%;
+    }
+
+    .services-grid,
+    .steps,
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+
+    footer {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
