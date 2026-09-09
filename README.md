@@ -44,6 +44,15 @@ Encargado de presentación = Fernanda Collazos.
 | **Clientes** | Registra y valida los datos del cliente (tipo de documento, número de documento, celular, tipo de trámite). | Información del cliente (nombre, tipo de documento, número de documento, celular, tipo de trámite). | **Turnos:** le solicita la creación del turno con los datos del cliente y recibe la confirmación con el número de turno generado. |
 | **Asesores** | Gestiona el estado de cada ventanilla (disponible/ocupada), asigna el turno al asesor. | Información de estado de ventanilla (disponible/ocupada). | **Turnos:** para conocer el turno que debe atender y registrar el cierre de la atención. |
 | **Notificaciones** | Informa al cliente cuando su turno va a ser atendido y en qué ventanilla. | Información del estado del turno, y a dónde dirigirse. | **Turnos:** para saber qué turno debe notificar, cuándo será atendido y en qué ventanilla.<br>**Clientes:** llega al cliente la notificación cuando será atendido. |
+
+## Dockerfile vista home
+## contenedor 
+<img width="1260" height="255" alt="image" src="https://github.com/user-attachments/assets/6ed54cc9-1966-4d99-8450-80d35b59c3e1" />
+## imagen
+<img width="1150" height="230" alt="image" src="https://github.com/user-attachments/assets/1601c6b8-fc66-4152-8dcc-aa207390e5a8" />
+## Home funcionando 
+<img width="986" height="487" alt="image" src="https://github.com/user-attachments/assets/6c7b4de7-d074-4c4e-863c-ebcb021cba7e" />
+
 # PARTE 1 — ENTENDER EL PROBLEMA
 
 ## Paso 1: Responder juntos
