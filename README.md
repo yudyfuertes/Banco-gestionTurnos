@@ -178,39 +178,85 @@ Se implementó y puso en funcionamiento el servicio Home, mientras que los demá
 | **Turnos** | Gestionar la asignación y el estado de los turnos. | Cédula, trámite, número de turno y estado. | Llama a **Asesores** para asignar el asesor al turno. |
 | **Asesores** | Gestionar asesores según el tipo de trámite y el turno que atiende cada uno. | Tipo de trámite, número de turno asignado, cédula del cliente atendido y estado. | Llama a **Turnos** para solicitar el siguiente turno, marcarlo como atendido y consultar información del turno. |
 
-## 7. Implementación de APIs REST
+# 7. Implementación de APIs REST
 
 Se implementaron APIs REST para gestionar los diferentes servicios del sistema: **Clientes, Turnos y Asesores**.
 
-### 7.1 Clientes
+Cada servicio cuenta con operaciones para consultar, crear, actualizar y eliminar información.
+
+## 7.1 API de Clientes
+
+La API de **Clientes** permite gestionar la información de los clientes del banco.
 
 | Método | Función |
 |---|---|
 | `GET` | Listar todos los clientes |
 | `GET /{id}` | Buscar un cliente por su ID |
 | `POST` | Crear un cliente |
-| `PUT` | Actualizar un cliente |
-| `DELETE` | Eliminar un cliente |
+| `PUT /{id}` | Actualizar un cliente |
+| `DELETE /{id}` | Eliminar un cliente |
 
-### 7.2 Turnos
+### Funciones principales
+
+- Consultar todos los clientes.
+- Buscar un cliente específico por su ID.
+- Registrar nuevos clientes.
+- Actualizar la información de un cliente.
+- Eliminar clientes.
+
+---
+
+## 7.2 API de Turnos
+
+La API de **Turnos** permite gestionar los turnos generados para los clientes.
 
 | Método | Función |
 |---|---|
 | `GET` | Listar todos los turnos |
 | `GET /{id}` | Buscar un turno por su ID |
 | `POST` | Crear un turno |
-| `PUT` | Actualizar un turno |
-| `DELETE` | Eliminar un turno |
+| `PUT /{id}` | Actualizar un turno |
+| `DELETE /{id}` | Eliminar un turno |
 
-### 7.3 Asesores
+### Funciones principales
+
+- Consultar todos los turnos.
+- Buscar un turno específico por su ID.
+- Crear nuevos turnos.
+- Actualizar la información y el estado de un turno.
+- Eliminar turnos.
+
+---
+
+## 7.3 API de Asesores
+
+La API de **Asesores** permite gestionar la información de los asesores encargados de atender los turnos.
 
 | Método | Función |
 |---|---|
 | `GET` | Listar todos los asesores |
 | `GET /{id}` | Buscar un asesor por su ID |
 | `POST` | Crear un asesor |
-| `PUT` | Actualizar un asesor |
-| `DELETE` | Eliminar un asesor |
+| `PUT /{id}` | Actualizar un asesor |
+| `DELETE /{id}` | Eliminar un asesor |
+
+### Funciones principales
+
+- Consultar todos los asesores.
+- Buscar un asesor específico por su ID.
+- Registrar nuevos asesores.
+- Actualizar la información de un asesor.
+- Eliminar asesores.
+
+---
+
+## 7.4 Resumen de APIs
+
+| Servicio | GET | GET /{id} | POST | PUT /{id} | DELETE /{id} |
+|---|---|---|---|---|---|
+| **Clientes** | Listar | Buscar | Crear | Actualizar | Eliminar |
+| **Turnos** | Listar | Buscar | Crear | Actualizar | Eliminar |
+| **Asesores** | Listar | Buscar | Crear | Actualizar | Eliminar |
 
 # PARTE 1 — ENTENDER EL PROBLEMA
 
