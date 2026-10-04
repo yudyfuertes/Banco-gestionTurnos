@@ -226,6 +226,133 @@ La API de **Asesores** permite gestionar la información de los asesores encarga
 
 ---
 
+8.Documentación de endpoints 
+
+1.Servicio de clientes
+Método
+Endpoint
+Descripción
+Entrada
+Respuesta
+GET
+/clientes
+Listar todos los clientes
+Ninguna
+Lista clientes
+GET
+/clientes/{id}
+Buscar un cliente por el id
+ID cliente
+Cliente específico
+GET
+/clientes/{id}/turno
+Consultar los turnos de un cliente
+ID cliente
+JSON con cliente (nombre) y turnos (lista). 404 si el cliente no existe
+POST
+/clientes
+Crear cliente
+JSON: nombre,cedula, tipo_tramite 
+Cliente + turno 
+PUT
+/clientes/{id}
+Actualizar cliente
+JSON actualizado
+Cliente modificado
+DELETE
+/clientes/{id}
+Eliminar cliente
+ID cliente
+Confirmación
+
+
+2.Servicio de turnos
+Método
+Endpoint
+Descripción
+Entrada
+Respuesta
+GET
+/turnos
+Listar todos los turnos
+Ninguna
+Lista turnos
+GET
+/turnos/{id}
+Buscar un turno por el id
+ID turno
+Turnos específico
+GET
+/turnos/cedula/{cedula}
+Listar los turnos de una cédula 
+Cédula
+Lista de turnos 
+GET
+/turnos/siguiente/{tramite}
+Obtener el turno en espera más antiguo de un trámite 
+Tipo de trámite
+Turno. 404 "No hay turnos en espera"
+POST
+/turnos
+Crear turno y pedir asesor 
+JSON: nombre, cedula,tramite 
+turno+asesor 
+PUT
+/turnos/{id}
+Actualizar turno
+JSON actualizado
+turno modificado
+DELETE
+/turnos/{id}
+Eliminar turno
+ID turno
+Confirmación
+
+
+3.Servicio de asesores
+Método
+Endpoint
+Descripción
+Entrada
+Respuesta
+GET
+/asesores
+Listar todos los asesores
+Ninguna
+Lista asesores
+GET
+/asesores/{id}
+Buscar un asesor por el id
+ID asesor
+asesor específico
+POST
+/asesores
+Crear asesor
+JSON: tipo_tramite 
+Confirmación 
+POST
+/asesores/asignar
+Asignar un asesor disponible del mismo trámite a un turno nuevo 
+JSON: id_turno, cedula, tramite
+Asesor en estado ocupado con turno_asignado y cedula_atendido. 
+POST
+/asesores/{id}/siguiente
+El asesor disponible toma el siguiente turno en espera de su trámite
+ID asesor
+JSON con mensaje, turno y cedula. está ocupado
+PUT
+/asesores/{id}
+Actualizar asesor
+JSON actualizado
+asesor modificado
+DELETE
+/asesores/{id}
+Eliminar asesor
+ID asesor
+Confirmación
+
+
+
 # PARTE 1 — ENTENDER EL PROBLEMA
 
 ## Paso 1: Responder juntos
