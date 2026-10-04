@@ -225,7 +225,7 @@ La API de **Asesores** permite gestionar la información de los asesores encarga
 | `DELETE /{id}` | Eliminar un asesor |
 
 ---
- 8. Documentación de endpoints
+# 8. Documentación de endpoints
 
 A continuación se presentan los endpoints disponibles para cada uno de los servicios del sistema: **Clientes, Turnos y Asesores**.
 
