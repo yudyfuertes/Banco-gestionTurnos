@@ -196,6 +196,40 @@ ASESORES
 TURNOS
 ```
 
+## 7. Implementación de APIs REST
+
+Se implementaron APIs REST para gestionar los diferentes servicios del sistema: **Clientes, Turnos y Asesores**.
+
+### 7.1 Clientes
+
+| Método | Función |
+|---|---|
+| `GET` | Listar todos los clientes |
+| `GET /{id}` | Buscar un cliente por su ID |
+| `POST` | Crear un cliente |
+| `PUT` | Actualizar un cliente |
+| `DELETE` | Eliminar un cliente |
+
+### 7.2 Turnos
+
+| Método | Función |
+|---|---|
+| `GET` | Listar todos los turnos |
+| `GET /{id}` | Buscar un turno por su ID |
+| `POST` | Crear un turno |
+| `PUT` | Actualizar un turno |
+| `DELETE` | Eliminar un turno |
+
+### 7.3 Asesores
+
+| Método | Función |
+|---|---|
+| `GET` | Listar todos los asesores |
+| `GET /{id}` | Buscar un asesor por su ID |
+| `POST` | Crear un asesor |
+| `PUT` | Actualizar un asesor |
+| `DELETE` | Eliminar un asesor |
+
 # PARTE 1 — ENTENDER EL PROBLEMA
 
 ## Paso 1: Responder juntos
