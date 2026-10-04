@@ -151,6 +151,11 @@ El servicio Home se encuentra actualmente implementado mediante un `Dockerfile` 
 ---
 
 ## Pull Request
+### Resumen
+
+En este avance se establece la estructura inicial del sistema distribuido Q-bank, definiendo la arquitectura basada en microservicios y configurando la infraestructura inicial mediante Docker.
+
+Se implementó y puso en funcionamiento el servicio Home, mientras que los demás microservicios se encuentran definidos en `docker-compose.yml` y serán desarrollados en las siguientes etapas.
 # 6. Diseño de responsabilidades
 
 ## Sistema de gestión de turnos de un banco
@@ -190,11 +195,6 @@ ASESORES
    ▼
 TURNOS
 ```
-### Resumen
-
-En este avance se establece la estructura inicial del sistema distribuido Q-bank, definiendo la arquitectura basada en microservicios y configurando la infraestructura inicial mediante Docker.
-
-Se implementó y puso en funcionamiento el servicio Home, mientras que los demás microservicios se encuentran definidos en `docker-compose.yml` y serán desarrollados en las siguientes etapas.
 
 # PARTE 1 — ENTENDER EL PROBLEMA
 
