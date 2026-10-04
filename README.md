@@ -225,131 +225,48 @@ La API de **Asesores** permite gestionar la información de los asesores encarga
 | `DELETE /{id}` | Eliminar un asesor |
 
 ---
+ 8. Documentación de endpoints
 
-8.Documentación de endpoints 
+A continuación se presentan los endpoints disponibles para cada uno de los servicios del sistema: **Clientes, Turnos y Asesores**.
 
-1.Servicio de clientes
-Método
-Endpoint
-Descripción
-Entrada
-Respuesta
-GET
-/clientes
-Listar todos los clientes
-Ninguna
-Lista clientes
-GET
-/clientes/{id}
-Buscar un cliente por el id
-ID cliente
-Cliente específico
-GET
-/clientes/{id}/turno
-Consultar los turnos de un cliente
-ID cliente
-JSON con cliente (nombre) y turnos (lista). 404 si el cliente no existe
-POST
-/clientes
-Crear cliente
-JSON: nombre,cedula, tipo_tramite 
-Cliente + turno 
-PUT
-/clientes/{id}
-Actualizar cliente
-JSON actualizado
-Cliente modificado
-DELETE
-/clientes/{id}
-Eliminar cliente
-ID cliente
-Confirmación
+## 8.1 Servicio de Clientes
 
+| Método | Endpoint | Descripción | Entrada | Respuesta |
+|---|---|---|---|---|
+| GET | /clientes | Listar todos los clientes | Ninguna | Lista de clientes |
+| GET | /clientes/{id} | Buscar un cliente por su ID | ID del cliente | Cliente específico |
+| GET | /clientes/{id}/turno | Consultar los turnos de un cliente | ID del cliente | JSON con el nombre del cliente y la lista de turnos. 404 si el cliente no existe |
+| POST | /clientes | Crear un cliente | JSON: nombre, cédula, tipo de trámite | Cliente + turno |
+| PUT | /clientes/{id} | Actualizar un cliente | JSON actualizado | Cliente modificado |
+| DELETE | /clientes/{id} | Eliminar un cliente | ID del cliente | Confirmación |
 
-2.Servicio de turnos
-Método
-Endpoint
-Descripción
-Entrada
-Respuesta
-GET
-/turnos
-Listar todos los turnos
-Ninguna
-Lista turnos
-GET
-/turnos/{id}
-Buscar un turno por el id
-ID turno
-Turnos específico
-GET
-/turnos/cedula/{cedula}
-Listar los turnos de una cédula 
-Cédula
-Lista de turnos 
-GET
-/turnos/siguiente/{tramite}
-Obtener el turno en espera más antiguo de un trámite 
-Tipo de trámite
-Turno. 404 "No hay turnos en espera"
-POST
-/turnos
-Crear turno y pedir asesor 
-JSON: nombre, cedula,tramite 
-turno+asesor 
-PUT
-/turnos/{id}
-Actualizar turno
-JSON actualizado
-turno modificado
-DELETE
-/turnos/{id}
-Eliminar turno
-ID turno
-Confirmación
+---
 
+## 8.2 Servicio de Turnos
 
-3.Servicio de asesores
-Método
-Endpoint
-Descripción
-Entrada
-Respuesta
-GET
-/asesores
-Listar todos los asesores
-Ninguna
-Lista asesores
-GET
-/asesores/{id}
-Buscar un asesor por el id
-ID asesor
-asesor específico
-POST
-/asesores
-Crear asesor
-JSON: tipo_tramite 
-Confirmación 
-POST
-/asesores/asignar
-Asignar un asesor disponible del mismo trámite a un turno nuevo 
-JSON: id_turno, cedula, tramite
-Asesor en estado ocupado con turno_asignado y cedula_atendido. 
-POST
-/asesores/{id}/siguiente
-El asesor disponible toma el siguiente turno en espera de su trámite
-ID asesor
-JSON con mensaje, turno y cedula. está ocupado
-PUT
-/asesores/{id}
-Actualizar asesor
-JSON actualizado
-asesor modificado
-DELETE
-/asesores/{id}
-Eliminar asesor
-ID asesor
-Confirmación
+| Método | Endpoint | Descripción | Entrada | Respuesta |
+|---|---|---|---|---|
+| GET | /turnos | Listar todos los turnos | Ninguna | Lista de turnos |
+| GET | /turnos/{id} | Buscar un turno por su ID | ID del turno | Turno específico |
+| GET | /turnos/cedula/{cedula} | Listar los turnos asociados a una cédula | Cédula | Lista de turnos |
+| GET | /turnos/siguiente/{tramite} | Obtener el turno en espera más antiguo de un trámite | Tipo de trámite | Turno. 404 si no hay turnos en espera |
+| POST | /turnos | Crear un turno y solicitar un asesor | JSON: nombre, cédula, trámite | Turno + asesor |
+| PUT | /turnos/{id} | Actualizar un turno | JSON actualizado | Turno modificado |
+| DELETE | /turnos/{id} | Eliminar un turno | ID del turno | Confirmación |
+
+---
+
+## 8.3 Servicio de Asesores
+
+| Método | Endpoint | Descripción | Entrada | Respuesta |
+|---|---|---|---|---|
+| GET | /asesores | Listar todos los asesores | Ninguna | Lista de asesores |
+| GET | /asesores/{id} | Buscar un asesor por su ID | ID del asesor | Asesor específico |
+| POST | /asesores | Crear un asesor | JSON: tipo de trámite | Confirmación |
+| POST | /asesores/asignar | Asignar un asesor disponible del mismo trámite a un turno nuevo | JSON: id_turno, cédula, trámite | Asesor en estado ocupado con turno asignado y cédula del cliente atendido |
+| POST | /asesores/{id}/siguiente | El asesor disponible toma el siguiente turno en espera de su trámite | ID del asesor | JSON con mensaje, turno y cédula. El asesor queda ocupado |
+| PUT | /asesores/{id} | Actualizar un asesor | JSON actualizado | Asesor modificado |
+| DELETE | /asesores/{id} | Eliminar un asesor | ID del asesor | Confirmación |
 
 
 
