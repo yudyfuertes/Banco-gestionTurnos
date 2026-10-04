@@ -151,7 +151,45 @@ El servicio Home se encuentra actualmente implementado mediante un `Dockerfile` 
 ---
 
 ## Pull Request
+# 6. Diseño de responsabilidades
 
+## Sistema de gestión de turnos de un banco
+
+### Responsabilidades iniciales
+
+| Servicio | Responsabilidad | Datos administrados |
+|---|---|---|
+| **Clientes** | Gestionar clientes | Nombre, cédula, tipo de trámite |
+| **Turnos** | Gestionar turnos | Nombre, cédula, tipo de trámite, número de turno |
+| **Asesores** | Gestionar asesores | Cédula, tipo de trámite, número de turno |
+
+---
+
+## Diseño de responsabilidades
+
+| Servicio | Responsabilidad | Datos administrados | Comunicación con otro servicio |
+|---|---|---|---|
+| **Clientes** | Gestionar clientes y generar la solicitud de turno. | Nombre, cédula, tipo de trámite. | Llama a **Turnos** para crear turno y consultar turno por cédula. |
+| **Turnos** | Gestionar la asignación y el estado de los turnos. | Cédula, trámite, número de turno y estado. | Llama a **Asesores** para asignar el asesor al turno. |
+| **Asesores** | Gestionar asesores según el tipo de trámite y el turno que atiende cada uno. | Tipo de trámite, número de turno asignado, cédula del cliente atendido y estado. | Llama a **Turnos** para solicitar el siguiente turno, marcarlo como atendido y consultar información del turno. |
+
+### Resumen de comunicación
+
+```text
+CLIENTES
+   │
+   │ Crear turno / Consultar turno
+   ▼
+TURNOS
+   │
+   │ Asignar asesor
+   ▼
+ASESORES
+   │
+   │ Siguiente turno / Marcar atendido / Consultar turno
+   ▼
+TURNOS
+```
 ### Resumen
 
 En este avance se establece la estructura inicial del sistema distribuido Q-bank, definiendo la arquitectura basada en microservicios y configurando la infraestructura inicial mediante Docker.
