@@ -196,14 +196,6 @@ La API de **Clientes** permite gestionar la información de los clientes del ban
 | `PUT /{id}` | Actualizar un cliente |
 | `DELETE /{id}` | Eliminar un cliente |
 
-### Funciones principales
-
-- Consultar todos los clientes.
-- Buscar un cliente específico por su ID.
-- Registrar nuevos clientes.
-- Actualizar la información de un cliente.
-- Eliminar clientes.
-
 ---
 
 ## 7.2 API de Turnos
@@ -217,14 +209,6 @@ La API de **Turnos** permite gestionar los turnos generados para los clientes.
 | `POST` | Crear un turno |
 | `PUT /{id}` | Actualizar un turno |
 | `DELETE /{id}` | Eliminar un turno |
-
-### Funciones principales
-
-- Consultar todos los turnos.
-- Buscar un turno específico por su ID.
-- Crear nuevos turnos.
-- Actualizar la información y el estado de un turno.
-- Eliminar turnos.
 
 ---
 
@@ -240,23 +224,7 @@ La API de **Asesores** permite gestionar la información de los asesores encarga
 | `PUT /{id}` | Actualizar un asesor |
 | `DELETE /{id}` | Eliminar un asesor |
 
-### Funciones principales
-
-- Consultar todos los asesores.
-- Buscar un asesor específico por su ID.
-- Registrar nuevos asesores.
-- Actualizar la información de un asesor.
-- Eliminar asesores.
-
 ---
-
-## 7.4 Resumen de APIs
-
-| Servicio | GET | GET /{id} | POST | PUT /{id} | DELETE /{id} |
-|---|---|---|---|---|---|
-| **Clientes** | Listar | Buscar | Crear | Actualizar | Eliminar |
-| **Turnos** | Listar | Buscar | Crear | Actualizar | Eliminar |
-| **Asesores** | Listar | Buscar | Crear | Actualizar | Eliminar |
 
 # PARTE 1 — ENTENDER EL PROBLEMA
 
