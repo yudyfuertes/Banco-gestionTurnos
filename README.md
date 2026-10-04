@@ -178,24 +178,6 @@ Se implementó y puso en funcionamiento el servicio Home, mientras que los demá
 | **Turnos** | Gestionar la asignación y el estado de los turnos. | Cédula, trámite, número de turno y estado. | Llama a **Asesores** para asignar el asesor al turno. |
 | **Asesores** | Gestionar asesores según el tipo de trámite y el turno que atiende cada uno. | Tipo de trámite, número de turno asignado, cédula del cliente atendido y estado. | Llama a **Turnos** para solicitar el siguiente turno, marcarlo como atendido y consultar información del turno. |
 
-### Resumen de comunicación
-
-```text
-CLIENTES
-   │
-   │ Crear turno / Consultar turno
-   ▼
-TURNOS
-   │
-   │ Asignar asesor
-   ▼
-ASESORES
-   │
-   │ Siguiente turno / Marcar atendido / Consultar turno
-   ▼
-TURNOS
-```
-
 ## 7. Implementación de APIs REST
 
 Se implementaron APIs REST para gestionar los diferentes servicios del sistema: **Clientes, Turnos y Asesores**.
