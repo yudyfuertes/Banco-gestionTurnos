@@ -327,6 +327,141 @@ Cada servicio cuenta con almacenamiento independiente: un contenedor MySQL, una 
 | `CLIENTES_URL` | URL interna que utiliza Docker para comunicarse con el servicio de clientes. |
 | `ASESORES_URL` | URL interna que utiliza Docker para comunicarse con el servicio de asesores. |
 
+## COMUNICACIÓN ENTRE SERVICIOS 
+Clientes -> Turnos
+ <img width="940" height="323" alt="imagen" src="https://github.com/user-attachments/assets/c205e45c-60e8-4296-a887-4970a649f163" />
+
+La comunicación de turnos y cliente se puede verificar al momento de crear un turno, es necesario que este enlazado a un cliente, por eso, tenemos:
+ <img width="940" height="292" alt="imagen" src="https://github.com/user-attachments/assets/01fab791-6eb9-4a01-a6aa-6492db631fe5" />
+
+Turnos -> asesores
+Si el servicio de asesores no esta disponible, este lanza una respuesta de error
+ <img width="940" height="300" alt="imagen" src="https://github.com/user-attachments/assets/27490c63-f894-4e75-afa4-f46481a39be4" />
+
+turnos -> asesor
+ <img width="940" height="294" alt="imagen" src="https://github.com/user-attachments/assets/230da8e6-d323-458f-89c2-fcfa9c4d11aa" />
+
+## Cliente solicita un turno
+| Elemento | Descripción |
+|---|---|
+| Servicio que solicita | clientes (puerto 5001), desde POST `/clientes/<id>/solicitar-turno` |
+| Servicio que responde | turnos (puerto 5003) |
+| Endpoint utilizado | `POST http://turnos:5003/turnos` |
+| Información enviada | JSON: `{"cliente_id": <id>, "tramite": <tipo, "general" por defecto>}` |
+| Información recibida | 201 con el turno creado: <ul><li>id, codigo (ej. T-001),</li><li>cliente_id,</li><li>asesor_id,</li><li>tramite,</li><li>estado (en_espera)</li><li>creado.</li></ul> También puede recibir 404 (cliente inexistente). |
+
+## Asesor atiende un turno
+| Elemento | Descripción |
+|---|---|
+| Servicio que solicita | asesores (puerto 5002), desde PUT `/asesores/<id>/atender-turno/<turno_id>` |
+| Servicio que responde | turnos (puerto 5003) |
+| Endpoint utilizado | `PUT http://turnos:5003/turnos/<turno_id>` |
+| Información enviada | JSON: `{"asesor_id": <id>, "estado": "en_atencion"}` (el estado puede venir en el body, por defecto en_atencion) |
+| Información recibida | 200 con el turno actualizado (asesor asignado y nuevo estado). También puede recibir 400 (estado inválido), 404 (turno o asesor inexistente) o 503 |
+
+## Turno consulta a clientes
+| Elemento | Descripción |
+|---|---|
+| Servicio que solicita | turnos (puerto 5003), al crear un turno (POST /turnos) y al consultar GET /turnos/<id>/detalle |
+| Servicio que responde | clientes (puerto 5001) |
+| Endpoint utilizado | `GET http://clientes:5001/clientes/<cliente_id>` |
+| Información enviada | Solo el id del cliente en la URL (sin body) |
+| Información recibida | 200 con los datos del cliente (id, nombre, documento, telefono) o 404 si no existe. Si no responde, turnos devuelve 503. |
+
+## Turnos consulta asesores
+| Elemento | Descripción |
+|---|---|
+| Servicio que solicita | turnos (puerto 5003), al crear o actualizar un turno con asesor_id y en GET /turnos/<id>/detalle |
+| Servicio que responde | asesores (puerto 5002) |
+| Endpoint utilizado | `GET http://asesores:5002/asesores/<asesor_id>` |
+| Información enviada | Solo el id del asesor en la URL (sin body) |
+| Información recibida | 200 con los datos del asesor (id, nombre, ventanilla, estado) o 404 si no existe. Si no responde, turnos devuelve 503. |
+
+## DOCKER COMPOSE 
+services:
+  home:
+      build: ./home
+      ports:
+        - "8080:80"
+
+  mysql_clientes:
+    image: mysql:8.0
+    container_name: mysql_clientes
+    environment:
+      MYSQL_ROOT_PASSWORD: ${CLIENTES_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${CLIENTES_DB_NAME}
+      MYSQL_USER: ${CLIENTES_DB_USER}
+      MYSQL_PASSWORD: ${CLIENTES_DB_PASSWORD}
+    ports:
+      - "${CLIENTES_MYSQL_HOST_PORT}:3306"
+    volumes:
+      - clientes_data:/var/lib/mysql
+
+  clientes:
+    build: ./clientes
+    container_name: servicio_clientes
+    env_file:
+      - ./clientes/.env
+    ports:
+      - "CLIENTES_P ORT:{CLIENTES_PORT}"
+    depends_on:
+      - mysql_clientes
+
+  mysql_asesores:
+    image: mysql:8.0
+    container_name: mysql_asesores
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ASESORES_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${ASESORES_DB_NAME}
+      MYSQL_USER: ${ASESORES_DB_USER}
+      MYSQL_PASSWORD: ${ASESORES_DB_PASSWORD}
+    ports:
+      - "${ASESORES_MYSQL_HOST_PORT}:3306"
+    volumes:
+      - asesores_data:/var/lib/mysql
+
+  asesores:
+    build: ./asesores
+    container_name: servicio_asesores
+    env_file:
+      - ./asesores/.env
+    ports:
+      - "ASESORES_P ORT:{ASESORES_PORT}"
+    depends_on:
+      - mysql_asesores
+
+  mysql_turnos:
+    image: mysql:8.0
+    container_name: mysql_turnos
+    environment:
+      MYSQL_ROOT_PASSWORD: ${TURNOS_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${TURNOS_DB_NAME}
+      MYSQL_USER: ${TURNOS_DB_USER}
+      MYSQL_PASSWORD: ${TURNOS_DB_PASSWORD}
+    ports:
+      - "${TURNOS_MYSQL_HOST_PORT}:3306"
+    volumes:
+      - turnos_data:/var/lib/mysql
+
+  turnos:
+    build: ./turnos
+    container_name: servicio_turnos
+    env_file:
+      - ./turnos/.env
+    ports:
+      - "TURNOS_P ORT:{TURNOS_PORT}"
+    depends_on:
+      - mysql_turnos
+
+volumes:
+  clientes_data:
+  asesores_data:
+  turnos_data:
+
+## DIAGRAMA ACTUALIZADO
+<img width="940" height="671" alt="imagen" src="https://github.com/user-attachments/assets/8e73b5f9-c0e3-4a11-bf06-a50693f09f4e" />
+
+
 # PARTE 1 — ENTENDER EL PROBLEMA
 
 ## Paso 1: Responder juntos
