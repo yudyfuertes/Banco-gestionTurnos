@@ -380,9 +380,9 @@ turnos -> asesor
 ## DOCKER COMPOSE 
 services:
   home:
-      build: ./home
-      ports:
-        - "8080:80"
+    build: ./home
+    ports:
+      - "8080:80"
 
   mysql_clientes:
     image: mysql:8.0
@@ -403,7 +403,7 @@ services:
     env_file:
       - ./clientes/.env
     ports:
-      - "CLIENTES_P ORT:{CLIENTES_PORT}"
+      - "${CLIENTES_PORT}:${CLIENTES_PORT}"
     depends_on:
       - mysql_clientes
 
@@ -426,7 +426,7 @@ services:
     env_file:
       - ./asesores/.env
     ports:
-      - "ASESORES_P ORT:{ASESORES_PORT}"
+      - "${ASESORES_PORT}:${ASESORES_PORT}"
     depends_on:
       - mysql_asesores
 
@@ -449,7 +449,7 @@ services:
     env_file:
       - ./turnos/.env
     ports:
-      - "TURNOS_P ORT:{TURNOS_PORT}"
+      - "${TURNOS_PORT}:${TURNOS_PORT}"
     depends_on:
       - mysql_turnos
 
@@ -457,6 +457,7 @@ volumes:
   clientes_data:
   asesores_data:
   turnos_data:
+
 
 ## DIAGRAMA ACTUALIZADO
 <img width="940" height="671" alt="imagen" src="https://github.com/user-attachments/assets/8e73b5f9-c0e3-4a11-bf06-a50693f09f4e" />
