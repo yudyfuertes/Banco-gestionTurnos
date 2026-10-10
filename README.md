@@ -193,7 +193,56 @@ Se definieron las responsabilidades de cada servicio, la información que admini
 | Asesores | Registrar, consultar, actualizar y eliminar asesores y sus ventanillas. | `id`, nombre, ventanilla y estado (por defecto, disponible). | No consulta otros servicios. Es consultado por Turnos mediante `GET /asesores/{id}`. |
 | Turnos | Crear turnos, asignarles un asesor y controlar su estado. | `id`, código (T-001), `cliente_id`, `asesor_id`, trámite, estado y fecha de creación. | Se comunica mediante REST con Clientes y Asesores para validar su existencia y obtener la información necesaria para mostrar el detalle del
 
+## Implementación de APIs REST
 
+Cada servicio implementa los métodos HTTP principales sobre su recurso. Los datos se envían y se reciben en formato JSON.
+
+| Método | Función | Clientes | Asesores | Turnos |
+|--------|---------|----------|----------|--------|
+| GET | Consultar información | `/clientes` | `/asesores` | `/turnos` |
+| GET/{id} | Consultar un elemento específico | `/clientes/{id}` | `/asesores/{id}` | `/turnos/{id}` |
+| POST | Crear información | `/clientes` | `/asesores` | `/turnos` |
+| PUT | Actualizar información | `/clientes/{id}` | `/asesores/{id}` | `/turnos/{id}` |
+| DELETE | Eliminar información | `/clientes/{id}` | `/asesores/{id}` | `/turnos/{id}` |
+
+Además, el servicio de Turnos expone `GET /turnos/{id}/detalle`, que combina los datos del turno con el nombre del cliente y del asesor.
+
+---
+
+## Documentación de endpoints
+
+Todos los errores se devuelven en formato JSON con la forma `{"error": "mensaje"}`. Las eliminaciones exitosas devuelven `{"mensaje": "... eliminado"}`.
+
+### Servicio Clientes (puerto 5001)
+
+| Método | Endpoint | Descripción | Entrada | Respuesta |
+|--------|----------|-------------|---------|-----------|
+| GET | `/clientes` | Consultar clientes | Ninguna | 200: lista de clientes |
+| GET | `/clientes/{id}` | Consultar un cliente | ID del cliente en la ruta | 200: cliente. 404: no encontrado |
+| POST | `/clientes` | Crear cliente | JSON: `nombre` y `documento` (obligatorios), `telefono` (opcional) | 201: cliente creado. 400: faltan datos. 409: documento repetido |
+| PUT | `/clientes/{id}` | Actualizar cliente | JSON con los campos a modificar | 200: cliente modificado. 404: no encontrado. 409: documento repetido |
+| DELETE | `/clientes/{id}` | Eliminar cliente | ID del cliente en la ruta | 200: confirmación. 404: no encontrado |
+
+### Servicio Asesores (puerto 5002)
+
+| Método | Endpoint | Descripción | Entrada | Respuesta |
+|--------|----------|-------------|---------|-----------|
+| GET | `/asesores` | Consultar asesores | Ninguna | 200: lista de asesores |
+| GET | `/asesores/{id}` | Consultar un asesor | ID del asesor en la ruta | 200: asesor. 404: no encontrado |
+| POST | `/asesores` | Crear asesor | JSON: `nombre` y `ventanilla` (obligatorios), `estado` (opcional) | 201: asesor creado. 400: faltan datos |
+| PUT | `/asesores/{id}` | Actualizar asesor | JSON con los campos a modificar | 200: asesor modificado. 404: no encontrado |
+| DELETE | `/asesores/{id}` | Eliminar asesor | ID del asesor en la ruta | 200: confirmación. 404: no encontrado |
+
+### Servicio Turnos (puerto 5003)
+
+| Método | Endpoint | Descripción | Entrada | Respuesta |
+|--------|----------|-------------|---------|-----------|
+| GET | `/turnos` | Consultar turnos | Ninguna | 200: lista de turnos |
+| GET | `/turnos/{id}` | Consultar un turno | ID del turno en la ruta | 200: turno. 404: no encontrado |
+| POST | `/turnos` | Crear turno | JSON: `cliente_id` (obligatorio), `asesor_id` y `tramite` (opcionales) | 201: turno con código T-001, T-002… 400: falta `cliente_id`. 404: cliente o asesor inexistente. 503: servicio no disponible |
+| PUT | `/turnos/{id}` | Actualizar turno | JSON: `estado`, `asesor_id` y/o `tramite` | 200: turno modificado. 400: estado inválido. 404: no encontrado. 503: servicio no disponible |
+| DELETE | `/turnos/{id}` | Eliminar turno | ID del turno en la ruta | 200: confirmación. 404: no encontrado |
+| GET | `/turnos/{id}/detalle` | Consultar el turno con el nombre del cliente y del asesor | ID del turno en la ruta | 200: detalle del turno. 404: no encontrado. 503: servicio no disponible |
 
 # PARTE 1 — ENTENDER EL PROBLEMA
 
