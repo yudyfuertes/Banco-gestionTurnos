@@ -156,117 +156,42 @@ El servicio Home se encuentra actualmente implementado mediante un `Dockerfile` 
 En este avance se establece la estructura inicial del sistema distribuido Q-bank, definiendo la arquitectura basada en microservicios y configurando la infraestructura inicial mediante Docker.
 
 Se implementó y puso en funcionamiento el servicio Home, mientras que los demás microservicios se encuentran definidos en `docker-compose.yml` y serán desarrollados en las siguientes etapas.
-# 6. Diseño de responsabilidades
 
-## Sistema de gestión de turnos de un banco
+# IMPLEMENTACIÓN DE SERVICIOS
 
-### Responsabilidades iniciales
+Se implementaron tres servicios independientes para el sistema Q-Bank. Cada servicio es una aplicación Flask con su propio archivo `app.py`, su `Dockerfile` y su archivo `requirements.txt`. Además, cada servicio se ejecuta en un contenedor independiente.
+
+### 1. Distribución de los servicios
 
 | Servicio | Responsabilidad | Datos administrados |
 |---|---|---|
-| **Clientes** | Gestionar clientes | Nombre, cédula, tipo de trámite |
-| **Turnos** | Gestionar turnos | Nombre, cédula, tipo de trámite, número de turno |
-| **Asesores** | Gestionar asesores | Cédula, tipo de trámite, número de turno |
+| Clientes | Gestionar los clientes del banco. | Nombre, documento de identidad y teléfono. |
+| Asesores | Gestionar los asesores y sus ventanillas de atención. | Nombre, ventanilla y estado del asesor. |
+| Turnos | Gestionar los turnos de atención. | Código del turno, cliente, asesor, trámite, estado y fecha de creación. |
+
+### 2. Cumplimiento de los requisitos
+
+| Requisito | Cómo se cumple en Q-Bank |
+|---|---|
+| Tener una responsabilidad específica | Cada servicio gestiona una única entidad: clientes, asesores o turnos. Ningún servicio accede directamente a las tablas de otro. |
+| Administrar información propia | Cada servicio lee y escribe únicamente en su propia base de datos. Turnos almacena `cliente_id` y `asesor_id` y obtiene los datos completos mediante solicitudes REST. |
+| Exponer una API REST | Los tres servicios utilizan Flask y devuelven respuestas en formato JSON mediante los métodos GET, POST, PUT y DELETE, utilizando códigos HTTP como 200, 201, 400, 404, 409 y 503. |
+| Tener persistencia de datos | Cada servicio almacena su información en MySQL 8.0, utilizando un volumen de Docker para persistir los datos de su base de datos. |
+| Poder ejecutarse independientemente | Cada servicio cuenta con su propio Dockerfile, contenedor y puerto (5001, 5002 y 5003). Si Clientes o Asesores se detienen, Turnos puede atender las consultas que no dependan de ellos y responde con el código 503 cuando necesita comunicarse con un servicio que no está disponible. |
 
 ---
 
-## Diseño de responsabilidades
+# DISEÑO DE RESPONSABILIDADES
 
-| Servicio | Responsabilidad | Datos administrados | Comunicación con otro servicio |
+Se definieron las responsabilidades de cada servicio, la información que administra y la forma en que se comunica con los demás servicios del sistema Q-Bank.
+
+### 1. Responsabilidades y comunicación entre servicios
+
+| Servicio | Responsabilidad | Información administrada | Comunicación con otros servicios |
 |---|---|---|---|
-| **Clientes** | Gestionar clientes y generar la solicitud de turno. | Nombre, cédula, tipo de trámite. | Llama a **Turnos** para crear turno y consultar turno por cédula. |
-| **Turnos** | Gestionar la asignación y el estado de los turnos. | Cédula, trámite, número de turno y estado. | Llama a **Asesores** para asignar el asesor al turno. |
-| **Asesores** | Gestionar asesores según el tipo de trámite y el turno que atiende cada uno. | Tipo de trámite, número de turno asignado, cédula del cliente atendido y estado. | Llama a **Turnos** para solicitar el siguiente turno, marcarlo como atendido y consultar información del turno. |
-
-# 7. Implementación de APIs REST
-
-Se implementaron APIs REST para gestionar los diferentes servicios del sistema: **Clientes, Turnos y Asesores**.
-
-Cada servicio cuenta con operaciones para consultar, crear, actualizar y eliminar información.
-
-## 7.1 API de Clientes
-
-La API de **Clientes** permite gestionar la información de los clientes del banco.
-
-| Método | Función |
-|---|---|
-| `GET` | Listar todos los clientes |
-| `GET /{id}` | Buscar un cliente por su ID |
-| `POST` | Crear un cliente |
-| `PUT /{id}` | Actualizar un cliente |
-| `DELETE /{id}` | Eliminar un cliente |
-
----
-
-## 7.2 API de Turnos
-
-La API de **Turnos** permite gestionar los turnos generados para los clientes.
-
-| Método | Función |
-|---|---|
-| `GET` | Listar todos los turnos |
-| `GET /{id}` | Buscar un turno por su ID |
-| `POST` | Crear un turno |
-| `PUT /{id}` | Actualizar un turno |
-| `DELETE /{id}` | Eliminar un turno |
-
----
-
-## 7.3 API de Asesores
-
-La API de **Asesores** permite gestionar la información de los asesores encargados de atender los turnos.
-
-| Método | Función |
-|---|---|
-| `GET` | Listar todos los asesores |
-| `GET /{id}` | Buscar un asesor por su ID |
-| `POST` | Crear un asesor |
-| `PUT /{id}` | Actualizar un asesor |
-| `DELETE /{id}` | Eliminar un asesor |
-
----
-# 8. Documentación de endpoints
-
-A continuación se presentan los endpoints disponibles para cada uno de los servicios del sistema: **Clientes, Turnos y Asesores**.
-
-## 8.1 Servicio de Clientes
-
-| Método | Endpoint | Descripción | Entrada | Respuesta |
-|---|---|---|---|---|
-| GET | /clientes | Listar todos los clientes | Ninguna | Lista de clientes |
-| GET | /clientes/{id} | Buscar un cliente por su ID | ID del cliente | Cliente específico |
-| GET | /clientes/{id}/turno | Consultar los turnos de un cliente | ID del cliente | JSON con el nombre del cliente y la lista de turnos. 404 si el cliente no existe |
-| POST | /clientes | Crear un cliente | JSON: nombre, cédula, tipo de trámite | Cliente + turno |
-| PUT | /clientes/{id} | Actualizar un cliente | JSON actualizado | Cliente modificado |
-| DELETE | /clientes/{id} | Eliminar un cliente | ID del cliente | Confirmación |
-
----
-
-## 8.2 Servicio de Turnos
-
-| Método | Endpoint | Descripción | Entrada | Respuesta |
-|---|---|---|---|---|
-| GET | /turnos | Listar todos los turnos | Ninguna | Lista de turnos |
-| GET | /turnos/{id} | Buscar un turno por su ID | ID del turno | Turno específico |
-| GET | /turnos/cedula/{cedula} | Listar los turnos asociados a una cédula | Cédula | Lista de turnos |
-| GET | /turnos/siguiente/{tramite} | Obtener el turno en espera más antiguo de un trámite | Tipo de trámite | Turno. 404 si no hay turnos en espera |
-| POST | /turnos | Crear un turno y solicitar un asesor | JSON: nombre, cédula, trámite | Turno + asesor |
-| PUT | /turnos/{id} | Actualizar un turno | JSON actualizado | Turno modificado |
-| DELETE | /turnos/{id} | Eliminar un turno | ID del turno | Confirmación |
-
----
-
-## 8.3 Servicio de Asesores
-
-| Método | Endpoint | Descripción | Entrada | Respuesta |
-|---|---|---|---|---|
-| GET | /asesores | Listar todos los asesores | Ninguna | Lista de asesores |
-| GET | /asesores/{id} | Buscar un asesor por su ID | ID del asesor | Asesor específico |
-| POST | /asesores | Crear un asesor | JSON: tipo de trámite | Confirmación |
-| POST | /asesores/asignar | Asignar un asesor disponible del mismo trámite a un turno nuevo | JSON: id_turno, cédula, trámite | Asesor en estado ocupado con turno asignado y cédula del cliente atendido |
-| POST | /asesores/{id}/siguiente | El asesor disponible toma el siguiente turno en espera de su trámite | ID del asesor | JSON con mensaje, turno y cédula. El asesor queda ocupado |
-| PUT | /asesores/{id} | Actualizar un asesor | JSON actualizado | Asesor modificado |
-| DELETE | /asesores/{id} | Eliminar un asesor | ID del asesor | Confirmación |
+| Clientes | Registrar, consultar, actualizar y eliminar clientes del banco. | `id`, nombre, documento único y teléfono. | No consulta otros servicios. Es consultado por Turnos mediante `GET /clientes/{id}`. |
+| Asesores | Registrar, consultar, actualizar y eliminar asesores y sus ventanillas. | `id`, nombre, ventanilla y estado (por defecto, disponible). | No consulta otros servicios. Es consultado por Turnos mediante `GET /asesores/{id}`. |
+| Turnos | Crear turnos, asignarles un asesor y controlar su estado. | `id`, código (T-001), `cliente_id`, `asesor_id`, trámite, estado y fecha de creación. | Se comunica mediante REST con Clientes y Asesores para validar su existencia y obtener la información necesaria para mostrar el detalle del
 
 
 
