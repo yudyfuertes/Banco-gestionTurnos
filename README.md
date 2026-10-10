@@ -247,6 +247,7 @@ Todos los errores se devuelven en formato JSON con la forma `{"error": "mensaje"
 ##  Persistencia de datos
 
 Cada servicio maneja sus propios datos y ninguno los guarda en listas o variables dentro del código: toda la información se almacena en una base de datos MySQL. Los servicios usan el conector `mysql-connector-python`. Por ejemplo, así se inserta un cliente en el servicio Clientes:
+<img width="940" height="444" alt="image" src="https://github.com/user-attachments/assets/f225ad0c-952b-4846-aa69-552dd1353177" />
 
 **Tabla 8. Aspectos de la persistencia de datos.**
 
@@ -264,6 +265,7 @@ Cada servicio maneja sus propios datos y ninguno los guarda en listas o variable
 ##  Base de datos por servicio
 
 Cada servicio cuenta con almacenamiento independiente: un contenedor MySQL, una base de datos y un volumen propios.
+<img width="940" height="904" alt="image" src="https://github.com/user-attachments/assets/8952848b-d425-4838-a15b-a692415931cf" />
 
 | Servicio | Base de datos utilizada | Tablas principales | Puerto del contenedor MySQL |
 |---|---|---|---|
