@@ -378,6 +378,7 @@ turnos -> asesor
 | Información recibida | 200 con los datos del asesor (id, nombre, ventanilla, estado) o 404 si no existe. Si no responde, turnos devuelve 503. |
 
 ## DOCKER COMPOSE 
+```
 services:
   home:
     build: ./home
@@ -429,35 +430,7 @@ services:
       - "${ASESORES_PORT}:${ASESORES_PORT}"
     depends_on:
       - mysql_asesores
-
-  mysql_turnos:
-    image: mysql:8.0
-    container_name: mysql_turnos
-    environment:
-      MYSQL_ROOT_PASSWORD: ${TURNOS_DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${TURNOS_DB_NAME}
-      MYSQL_USER: ${TURNOS_DB_USER}
-      MYSQL_PASSWORD: ${TURNOS_DB_PASSWORD}
-    ports:
-      - "${TURNOS_MYSQL_HOST_PORT}:3306"
-    volumes:
-      - turnos_data:/var/lib/mysql
-
-  turnos:
-    build: ./turnos
-    container_name: servicio_turnos
-    env_file:
-      - ./turnos/.env
-    ports:
-      - "${TURNOS_PORT}:${TURNOS_PORT}"
-    depends_on:
-      - mysql_turnos
-
-volumes:
-  clientes_data:
-  asesores_data:
-  turnos_data:
-
+```
 
 ## DIAGRAMA ACTUALIZADO
 <img width="940" height="671" alt="imagen" src="https://github.com/user-attachments/assets/8e73b5f9-c0e3-4a11-bf06-a50693f09f4e" />
