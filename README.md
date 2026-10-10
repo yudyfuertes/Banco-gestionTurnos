@@ -244,6 +244,65 @@ Todos los errores se devuelven en formato JSON con la forma `{"error": "mensaje"
 | DELETE | `/turnos/{id}` | Eliminar turno | ID del turno en la ruta | 200: confirmación. 404: no encontrado |
 | GET | `/turnos/{id}/detalle` | Consultar el turno con el nombre del cliente y del asesor | ID del turno en la ruta | 200: detalle del turno. 404: no encontrado. 503: servicio no disponible |
 
+##  Persistencia de datos
+
+Cada servicio maneja sus propios datos y ninguno los guarda en listas o variables dentro del código: toda la información se almacena en una base de datos MySQL. Los servicios usan el conector `mysql-connector-python`. Por ejemplo, así se inserta un cliente en el servicio Clientes:
+
+**Tabla 8. Aspectos de la persistencia de datos.**
+
+| Aspecto | Implementación |
+|---|---|
+| Motor de base de datos | MySQL 8.0 (imagen oficial `mysql:8.0`), un contenedor por servicio. |
+| Acceso desde el código | Funciones `consultar()` y `ejecutar()` de cada `app.py`, con consultas parametrizadas. |
+| Creación de las tablas | Se crean por consola con los comandos `CREATE TABLE` del archivo `INSERTAR_DATOS.md`; los servicios no crean tablas por su cuenta. |
+| Datos de ejemplo | Se insertan por consola con los comandos `INSERT` del mismo archivo (2 clientes, 2 asesores y 2 turnos). |
+| Conservación de los datos | Cada base usa un volumen de Docker (`clientes_data`, `asesores_data`, `turnos_data`). |
+| Espera de la base de datos | Al iniciar, cada servicio reintenta la conexión cada 3 segundos hasta que su base de datos existe. |
+
+---
+
+##  Base de datos por servicio
+
+Cada servicio cuenta con almacenamiento independiente: un contenedor MySQL, una base de datos y un volumen propios.
+
+| Servicio | Base de datos utilizada | Tablas principales | Puerto del contenedor MySQL |
+|---|---|---|---|
+| Clientes | bd: `clientes_db`<br>Contenedor: `mysql_clientes`<br>Volumen: `clientes_data` | `clientes` | `3307` |
+| Asesores | bd: `asesores_db`<br>Contenedor: `mysql_asesores`<br>Volumen: `asesores_data` | `asesores` | `3308` |
+| Turnos | bd: `turnos_db`<br>Contenedor: `mysql_turnos`<br>Volumen: `turnos_data` | `turnos` | `3309` |
+
+### Estructura de cada tabla
+
+#### `clientes_db`
+
+| Campo | Tipo | Restricciones |
+|---|---|---|
+| `id` | `INT` | Llave primaria, `AUTO_INCREMENT` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `documento` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
+| `telefono` | `VARCHAR(20)` | Opcional |
+
+#### `asesores_db`
+
+| Campo | Tipo | Restricciones |
+|---|---|---|
+| `id` | `INT` | Llave primaria, `AUTO_INCREMENT` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `ventanilla` | `INT` | `NOT NULL` |
+| `estado` | `VARCHAR(20)` | `NOT NULL`, valor por defecto `'disponible'` |
+
+#### `turnos_db`
+
+| Campo | Tipo | Restricciones |
+|---|---|---|
+| `id` | `INT` | Llave primaria, `AUTO_INCREMENT` |
+| `codigo` | `VARCHAR(10)` | Código del turno (T-001, T-002…), generado por el servicio |
+| `cliente_id` | `INT` | `NOT NULL`. Referencia lógica a `clientes.id` |
+| `asesor_id` | `INT` | Opcional. Referencia lógica a `asesores.id` |
+| `tramite` | `VARCHAR(50)` | `NOT NULL`, valor por defecto `'general'` |
+| `estado` | `VARCHAR(20)` | `NOT NULL`, valor por defecto `'en_espera'` |
+| `creado` | `TIMESTAMP` | Valor por defecto `CURRENT_TIMESTAMP` |
+
 # PARTE 1 — ENTENDER EL PROBLEMA
 
 ## Paso 1: Responder juntos
