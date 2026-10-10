@@ -193,7 +193,7 @@ Se definieron las responsabilidades de cada servicio, la información que admini
 | Asesores | Registrar, consultar, actualizar y eliminar asesores y sus ventanillas. | `id`, nombre, ventanilla y estado (por defecto, disponible). | No consulta otros servicios. Es consultado por Turnos mediante `GET /asesores/{id}`. |
 | Turnos | Crear turnos, asignarles un asesor y controlar su estado. | `id`, código (T-001), `cliente_id`, `asesor_id`, trámite, estado y fecha de creación. | Se comunica mediante REST con Clientes y Asesores para validar su existencia y obtener la información necesaria para mostrar el detalle del
 
-## Implementación de APIs REST
+## IMPLEMENTACION DE APIS REST
 
 Cada servicio implementa los métodos HTTP principales sobre su recurso. Los datos se envían y se reciben en formato JSON.
 
@@ -209,7 +209,7 @@ Además, el servicio de Turnos expone `GET /turnos/{id}/detalle`, que combina lo
 
 ---
 
-## Documentación de endpoints
+## DOCUMENTACION DE ENDPOINTS
 
 Todos los errores se devuelven en formato JSON con la forma `{"error": "mensaje"}`. Las eliminaciones exitosas devuelven `{"mensaje": "... eliminado"}`.
 
