@@ -303,6 +303,30 @@ Cada servicio cuenta con almacenamiento independiente: un contenedor MySQL, una 
 | `estado` | `VARCHAR(20)` | `NOT NULL`, valor por defecto `'en_espera'` |
 | `creado` | `TIMESTAMP` | Valor por defecto `CURRENT_TIMESTAMP` |
 
+## CONFIGURACIÓN DE LAS VARIABLES DE ENTORNO 
+CONFIGURACIÓN DE LAS VARIABLES DE ENTORNO
+Variable	Uso
+CLIENTES_DB_NAME	Nombre de la base de datos de clientes.
+CLIENTES_DB_USER	Usuario de MySQL para acceder a la base de datos de clientes.
+CLIENTES_DB_PASSWORD	Contraseña del usuario de MySQL de clientes.
+CLIENTES_DB_ROOT_PASSWORD	Contraseña del usuario root de MySQL de clientes.
+CLIENTES_PORT	Puerto donde se ejecuta el servicio Flask de clientes.
+CLIENTES_MYSQL_HOST_PORT	Puerto del equipo anfitrión para acceder al MySQL de clientes.
+ASESORES_DB_NAME	Nombre de la base de datos de asesores.
+ASESORES_DB_USER	Usuario de MySQL para acceder a la base de datos de asesores.
+ASESORES_DB_PASSWORD	Contraseña del usuario de MySQL de asesores.
+ASESORES_DB_ROOT_PASSWORD	Contraseña del usuario root de MySQL de asesores.
+ASESORES_PORT	Puerto donde se ejecuta el servicio Flask de asesores.
+ASESORES_MYSQL_HOST_PORT	Puerto del equipo anfitrión para acceder al MySQL de asesores.
+TURNOS_DB_NAME	Nombre de la base de datos de turnos.
+TURNOS_DB_USER	Usuario de MySQL para acceder a la base de datos de turnos.
+TURNOS_DB_PASSWORD	Contraseña del usuario de MySQL de turnos.
+TURNOS_DB_ROOT_PASSWORD	Contraseña del usuario root de MySQL de turnos.
+TURNOS_PORT	Puerto donde se ejecuta el servicio Flask de turnos.
+TURNOS_MYSQL_HOST_PORT	Puerto del equipo anfitrión para acceder al MySQL de turnos.
+CLIENTES_URL	URL interna de Docker para comunicarse con el servicio de clientes.
+ASESORES_URL	URL interna de Docker para comunicarse con el servicio de asesores.
+
 # PARTE 1 — ENTENDER EL PROBLEMA
 
 ## Paso 1: Responder juntos
