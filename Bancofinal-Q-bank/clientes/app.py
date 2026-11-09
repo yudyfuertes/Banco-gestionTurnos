@@ -1,4 +1,6 @@
 import os
+import time
+import pybreaker
 import requests
 import mysql.connector
 from dotenv import load_dotenv
@@ -11,14 +13,29 @@ app = Flask(__name__)
 TURNOS_URL = os.getenv("TURNOS_URL", "http://turnos:5003")
 
 
+TURNOS_TIMEOUT = float(os.getenv("TURNOS_TIMEOUT", "5"))
+circuito_turnos = pybreaker.CircuitBreaker(
+    fail_max=int(os.getenv("CB_MAX_FALLOS", "3")),
+    reset_timeout=int(os.getenv("CB_RECUPERACION", "30")),
+    throw_new_error_on_trip=False,
+)
+
+
 def conectar():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT", "3306")),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-    )
+    for intento in range(10):
+        try:
+            return mysql.connector.connect(
+                host=os.getenv("DB_HOST"),
+                port=int(os.getenv("DB_PORT", "3306")),
+                database=os.getenv("DB_NAME"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+            )
+        except mysql.connector.Error as e:
+            print(f"La base de datos aún está cargando. Intento {intento + 1}/10")
+            print(e)
+            time.sleep(3)
+    raise Exception("No fue posible conectar con MySQL después de 10 intentos")
 
 
 def consultar(sql, valores=None):
@@ -108,11 +125,31 @@ def solicitar_turno(id):
         "tramite": datos.get("tramite", "general")
     }
 
+
     try:
-        resp = requests.post(f"{TURNOS_URL}/turnos", json=payload, timeout=5)
-        return jsonify(resp.json()), resp.status_code
-    except requests.RequestException:
-        return error("Servicio de turnos no disponible", 503)
+        with circuito_turnos.calling():
+            resp = requests.post(f"{TURNOS_URL}/turnos", json=payload, timeout=TURNOS_TIMEOUT)
+            if resp.status_code >= 500:
+                resp.raise_for_status()
+    except pybreaker.CircuitBreakerError:
+        return error("Circuito abierto: servicio de turnos no disponible", 503)
+    except requests.exceptions.Timeout:
+        return error("El servicio de turnos no responde", 504)
+    except requests.exceptions.ConnectionError:
+        return error("No se pudo conectar con el servicio de turnos", 503)
+    except requests.exceptions.HTTPError:
+        return error("Error en el servicio de turnos", 502)
+    return jsonify(resp.json()), resp.status_code
+
+
+
+@app.get("/clientes/circuito")
+def estado_circuito():
+    return jsonify({
+        "estado": circuito_turnos.current_state.upper(),
+        "fallos_consecutivos": circuito_turnos.fail_counter,
+        "periodo_recuperacion": circuito_turnos.reset_timeout,
+    })
 
 
 if __name__ == "__main__":
