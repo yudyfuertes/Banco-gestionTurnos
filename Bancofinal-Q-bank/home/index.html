@@ -3,17 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Q-Bank | Gestión de Turnos</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
-    <!-- =========================
-        ENCABEZADO
-    ========================== -->
 
     <header>
         <div class="logo">
@@ -22,83 +16,128 @@
         </div>
 
         <nav>
-            <a href="#">Inicio</a>
-            <a href="#servicios">Servicios</a>
-            <a href="#proceso">¿Cómo funciona?</a>
+            <a href="#inicio">Inicio</a>
+            <a href="#solicitar">Solicitar turno</a>
+            <a href="#turnos">Turnos</a>
+            <a href="#asesores">Asesores</a>
+            <a href="#clientes">Clientes</a>
+            <a href="#sistema">Sistema</a>
             <a href="#equipo">Equipo</a>
         </nav>
     </header>
 
-
-    <!-- =========================
-         HERO / PRESENTACIÓN
-    ========================== -->
-
     <main>
 
-        <section class="hero">
+        <!-- ========== INICIO ========== -->
+        <section class="hero" id="inicio">
 
             <div class="hero-content">
+                <span class="badge">SISTEMA DE GESTIÓN DE TURNOS</span>
 
-                <span class="badge">
-                    SISTEMA DE GESTIÓN DE TURNOS
-                </span>
-
-                <h1>
-                    Tu turno, de forma
-                    <span>rápida y sencilla.</span>
-                </h1>
+                <h1>Tu turno, de forma <span>rápida y sencilla.</span></h1>
 
                 <p>
-                    Q-Bank es una solución digital diseñada para organizar
-                    y gestionar los turnos bancarios de manera eficiente,
-                    reduciendo los tiempos de espera y mejorando la atención
-                    de nuestros clientes.
+                    Q-Bank organiza los turnos bancarios para reducir los tiempos
+                    de espera y mejorar la atención de los clientes. Solicita tu
+                    turno, consulta tu posición y mira en qué ventanilla te atienden.
                 </p>
 
                 <div class="hero-buttons">
-                    <a href="#" class="btn btn-primary">
-                        Solicitar turno
-                    </a>
-
-                    <a href="#servicios" class="btn btn-secondary">
-                        Conocer el sistema
-                    </a>
+                    <a href="#solicitar" class="btn btn-primary">Solicitar turno</a>
+                    <a href="#turnos" class="btn btn-secondary">Ver la fila</a>
                 </div>
 
+                <div class="stats">
+                    <div class="stat">
+                        <strong id="stat-espera">0</strong>
+                        <span>En espera</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="stat-atencion">0</strong>
+                        <span>En atención</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="stat-atendidos">0</strong>
+                        <span>Atendidos</span>
+                    </div>
+                </div>
             </div>
 
-
-            <!-- Tarjeta únicamente visual -->
-
             <div class="hero-card">
-
                 <div class="card-header">
                     <h3>Estado de atención</h3>
-
-                    <span class="status">
-                        ● En atención
-                    </span>
+                    <span class="status" id="hero-estado">● Sin turnos</span>
                 </div>
 
                 <div class="turn-number">
                     <small>Turno actual</small>
-                    <strong>A-024</strong>
+                    <strong id="hero-codigo">—</strong>
                 </div>
 
                 <div class="info">
                     <span>Servicio</span>
-                    <span>Atención al cliente</span>
+                    <span id="hero-tramite">—</span>
                 </div>
-
                 <div class="info">
                     <span>Ventanilla</span>
-                    <span>04</span>
+                    <span id="hero-ventanilla">—</span>
                 </div>
-
                 <div class="info">
-                    <span>Estado</span>
-                    <span>Atendiendo</span>
+                    <span>Asesor</span>
+                    <span id="hero-asesor">—</span>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ========== SOLICITAR TURNO ========== -->
+        <section class="panel" id="solicitar">
+
+            <div class="section-title">
+                <h2>Solicitar turno</h2>
+                <p>Registra tus datos y elige el trámite. Te asignamos de una vez al asesor que lo atiende. Si ya eres cliente, solo escribe tu documento.</p>
+            </div>
+
+            <div class="solicitar-grid">
+
+                <form id="form-turno" class="formulario">
+                    <label>
+                        Número de documento
+                        <input type="text" id="t-documento" placeholder="Ej: 1001" required>
+                    </label>
+
+                    <label>
+                        Nombre completo
+                        <input type="text" id="t-nombre" placeholder="Tu nombre" required>
+                    </label>
+
+                    <label>
+                        Teléfono
+                        <input type="text" id="t-telefono" placeholder="Ej: 3001112233">
+                    </label>
+
+                    <label>
+                        Trámite
+                        <select id="t-tramite">
+                            <option value="general">Atención general</option>
+                            <option value="caja">Caja</option>
+                            <option value="credito">Crédito</option>
+                            <option value="cuentas">Cuentas</option>
+                            <option value="reclamos">Reclamos</option>
+                        </select>
+                    </label>
+
+                    <p class="nota" id="t-nota"></p>
+                    <p class="nota error" id="t-aviso"></p>
+
+                    <button type="submit" class="btn btn-primary btn-block" id="t-boton">Pedir turno</button>
+                </form>
+
+                <div class="ticket" id="ticket">
+                    <small>Tu turno</small>
+                    <strong id="ticket-codigo">—</strong>
+                    <p id="ticket-mensaje">Cuando pidas un turno, aparecerá aquí.</p>
                 </div>
 
             </div>
@@ -106,207 +145,212 @@
         </section>
 
 
-        <!-- =========================
-             SERVICIOS
-        ========================== -->
-
-        <section class="services" id="servicios">
+        <!-- ========== TURNOS ========== -->
+        <section class="panel panel-gris" id="turnos">
 
             <div class="section-title">
-
-                <h2>
-                    Todo lo necesario para gestionar tus turnos
-                </h2>
-
-                <p>
-                    Q-Bank integra diferentes servicios para ofrecer una
-                    gestión organizada, segura y eficiente de la atención
-                    bancaria.
-                </p>
-
+                <h2>Fila de turnos</h2>
+                <p>Se actualiza automáticamente cada pocos segundos.</p>
             </div>
 
+            <div id="filas-turnos">
+            <h3 class="fila-titulo">Todos los turnos <span class="contador" id="cuenta-todos">0</span></h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Turno</th>
+                            <th>Cliente</th>
+                            <th>Trámite</th>
+                            <th>Estado</th>
+                            <th>Posición</th>
+                            <th>Ventanilla · Asesor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-todos"></tbody>
+                </table>
+            </div>
 
-            <div class="services-grid">
+            <h3 class="fila-titulo">En espera <span class="contador" id="cuenta-en_espera">0</span></h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Turno</th>
+                            <th>Cliente</th>
+                            <th>Trámite</th>
+                            <th>Estado</th>
+                            <th>Posición</th>
+                            <th>Ventanilla · Asesor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-en_espera"></tbody>
+                </table>
+            </div>
 
-                <article class="service-card">
+            <h3 class="fila-titulo">En atención <span class="contador" id="cuenta-en_atencion">0</span></h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Turno</th>
+                            <th>Cliente</th>
+                            <th>Trámite</th>
+                            <th>Estado</th>
+                            <th>Posición</th>
+                            <th>Ventanilla · Asesor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-en_atencion"></tbody>
+                </table>
+            </div>
 
-                    <div class="service-icon">
-                        #
-                    </div>
+            <h3 class="fila-titulo">Atendidos <span class="contador" id="cuenta-atendido">0</span></h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Turno</th>
+                            <th>Cliente</th>
+                            <th>Trámite</th>
+                            <th>Estado</th>
+                            <th>Posición</th>
+                            <th>Ventanilla · Asesor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-atendido"></tbody>
+                </table>
+            </div>
 
-                    <h3>
-                        Gestión de turnos
-                    </h3>
-
-                    <p>
-                        Generación y organización de turnos de acuerdo con
-                        el tipo de servicio y prioridad del cliente.
-                    </p>
-
-                </article>
-
-
-                <article class="service-card">
-
-                    <div class="service-icon">
-                        👤
-                    </div>
-
-                    <h3>
-                        Gestión de clientes
-                    </h3>
-
-                    <p>
-                        Registro y validación de la información necesaria
-                        para identificar al cliente y su trámite.
-                    </p>
-
-                </article>
-
-
-                <article class="service-card">
-
-                    <div class="service-icon">
-                        ✓
-                    </div>
-
-                    <h3>
-                        Gestión de asesores
-                    </h3>
-
-                    <p>
-                        Control del estado de las ventanillas y asignación
-                        de turnos a los asesores disponibles.
-                    </p>
-
-                </article>
-
-
-                <article class="service-card">
-
-                    <div class="service-icon">
-                        🔔
-                    </div>
-
-                    <h3>
-                        Notificaciones
-                    </h3>
-
-                    <p>
-                        Información al cliente sobre el avance de su turno,
-                        su llamado y la ventanilla correspondiente.
-                    </p>
-
-                </article>
+            <h3 class="fila-titulo">Cancelados <span class="contador" id="cuenta-cancelado">0</span></h3>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Turno</th>
+                            <th>Cliente</th>
+                            <th>Trámite</th>
+                            <th>Estado</th>
+                            <th>Posición</th>
+                            <th>Ventanilla · Asesor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cancelado"></tbody>
+                </table>
+            </div>
 
             </div>
 
         </section>
 
 
-        <!-- =========================
-             PROCESO
-        ========================== -->
-
-        <section class="process" id="proceso">
+        <!-- ========== ASESORES ========== -->
+        <section class="panel" id="asesores">
 
             <div class="section-title">
-
-                <h2>
-                    ¿Cómo funciona Q-Bank?
-                </h2>
-
-                <p>
-                    Un proceso sencillo para mejorar la experiencia del
-                    cliente y optimizar la atención bancaria.
-                </p>
-
+                <h2>Panel de asesores</h2>
+                <p>Registra al asesor con su ventanilla y el trámite que va a atender. Los turnos se asignan automáticamente según el trámite; cada asesor llama al siguiente de <strong>su fila</strong> y finaliza la atención al terminar.</p>
             </div>
 
+            <div class="asesores-grid" id="lista-asesores"></div>
 
-            <div class="steps">
+            <form id="form-asesor" class="formulario formulario-linea">
+                <input type="text" id="a-nombre" placeholder="Nombre del asesor" required>
+                <input type="number" id="a-ventanilla" placeholder="Ventanilla" min="1" required>
+                <select id="a-tramite" required>
+                    <option value="general">Atención general</option>
+                    <option value="caja">Caja</option>
+                    <option value="credito">Crédito</option>
+                    <option value="cuentas">Cuentas</option>
+                    <option value="reclamos">Reclamos</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">Agregar asesor</button>
+            </form>
 
-                <article class="step">
-
-                    <div class="step-number">
-                        1
-                    </div>
-
-                    <h3>
-                        Solicita tu turno
-                    </h3>
-
-                    <p>
-                        El cliente registra sus datos y selecciona el tipo
-                        de trámite que necesita realizar.
-                    </p>
-
-                </article>
+        </section>
 
 
-                <article class="step">
+        <!-- ========== CLIENTES ========== -->
+        <section class="panel panel-gris" id="clientes">
 
-                    <div class="step-number">
-                        2
-                    </div>
+            <div class="section-title">
+                <h2>Clientes registrados</h2>
+                <p>Información que administra el servicio Clientes.</p>
+            </div>
 
-                    <h3>
-                        Espera tu llamado
-                    </h3>
+            <div class="barra">
+                <input type="text" id="buscar-cliente" placeholder="Buscar por nombre o documento">
+            </div>
 
-                    <p>
-                        El sistema organiza los turnos según el servicio
-                        y la prioridad correspondiente.
-                    </p>
-
-                </article>
-
-
-                <article class="step">
-
-                    <div class="step-number">
-                        3
-                    </div>
-
-                    <h3>
-                        Recibe atención
-                    </h3>
-
-                    <p>
-                        El cliente recibe la información de la ventanilla
-                        donde será atendido.
-                    </p>
-
-                </article>
-
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-clientes"></tbody>
+                </table>
             </div>
 
         </section>
 
 
-        <!-- =========================
-             EQUIPO
-        ========================== -->
+        <!-- ========== ESTADO DEL SISTEMA ========== -->
+        <section class="panel" id="sistema">
 
+            <div class="section-title">
+                <h2>Estado del sistema</h2>
+                <p>
+                    Disponibilidad de cada servicio y estado de los circuit breakers
+                    que protegen la comunicación entre ellos.
+                </p>
+            </div>
+
+            <div class="sistema-grid">
+
+                <article class="sistema-card">
+                    <h3>Servicios</h3>
+                    <div class="fila-estado"><span>Clientes</span><span class="pill" id="svc-clientes">…</span></div>
+                    <div class="fila-estado"><span>Asesores</span><span class="pill" id="svc-asesores">…</span></div>
+                    <div class="fila-estado"><span>Turnos</span><span class="pill" id="svc-turnos">…</span></div>
+                </article>
+
+                <article class="sistema-card">
+                    <h3>Circuit breakers</h3>
+                    <div class="fila-estado"><span>Turnos → Clientes</span><span class="pill" id="cb-turnos-clientes">…</span></div>
+                    <div class="fila-estado"><span>Turnos → Asesores</span><span class="pill" id="cb-turnos-asesores">…</span></div>
+                    <div class="fila-estado"><span>Clientes → Turnos</span><span class="pill" id="cb-clientes-turnos">…</span></div>
+                    <div class="fila-estado"><span>Asesores → Turnos</span><span class="pill" id="cb-asesores-turnos">…</span></div>
+                </article>
+
+            </div>
+
+            <p class="nota nota-centro">
+                CLOSED: el servicio responde con normalidad. OPEN: el servicio falló varias veces
+                seguidas y se bloquean las llamadas por un tiempo. HALF-OPEN: se está probando si ya se recuperó.
+            </p>
+
+        </section>
+
+
+        <!-- ========== EQUIPO ========== -->
         <section class="team" id="equipo">
 
             <div class="section-title">
-
-                <h2>
-                    Nuestro equipo
-                </h2>
-
-                <p>
-                    Proyecto desarrollado por estudiantes comprometidos
-                    con la creación de soluciones tecnológicas.
-                </p>
-
+                <h2>Nuestro equipo</h2>
+                <p>Proyecto desarrollado por estudiantes comprometidos con la creación de soluciones tecnológicas.</p>
             </div>
 
-
             <div class="team-grid">
-
                 <article class="member">
                     <div class="avatar">YF</div>
                     <h3>Yudy Fuertes</h3>
@@ -330,33 +374,31 @@
                     <h3>Valeria Sanchez</h3>
                     <p>Integrante del proyecto</p>
                 </article>
-
             </div>
 
         </section>
 
     </main>
 
-
-    <!-- =========================
-         PIE DE PÁGINA
-    ========================== -->
-
     <footer>
-
-        <div class="footer-logo">
-            Q-Bank
-        </div>
-
-        <p>
-            Sistema de gestión de turnos bancarios
-        </p>
-
-        <p>
-            © 2026 Q-Bank
-        </p>
-
+        <div class="footer-logo">Q-Bank</div>
+        <p>Sistema de gestión de turnos bancarios</p>
+        <p>© 2026 Q-Bank</p>
     </footer>
 
+
+    <!-- Ventana de detalle del turno -->
+    <div class="modal oculto" id="modal">
+        <div class="modal-caja">
+            <button class="modal-cerrar" id="modal-cerrar">×</button>
+            <h3>Detalle del turno</h3>
+            <div id="modal-contenido"></div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="toast oculto" id="toast"></div>
+
+    <script src="app.js"></script>
 </body>
 </html>
