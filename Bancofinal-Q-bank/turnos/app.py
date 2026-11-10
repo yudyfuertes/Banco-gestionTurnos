@@ -1,225 +1,269 @@
-import os
-import time
-import pybreaker
-import requests
-import mysql.connector
-from dotenv import load_dotenv
 from flask import Flask, jsonify, request
-
-load_dotenv()
+import requests, os, pybreaker
+from database import conectar
 
 app = Flask(__name__)
 
-
-def conectar():
-    for intento in range(10):
-        try:
-            return mysql.connector.connect(
-                host=os.getenv("DB_HOST"),
-                port=int(os.getenv("DB_PORT", "3306")),
-                database=os.getenv("DB_NAME"),
-                user=os.getenv("DB_USER"),
-                password=os.getenv("DB_PASSWORD"),
-            )
-        except mysql.connector.Error as e:
-            print(f"La base de datos aún está cargando. Intento {intento + 1}/10")
-            print(e)
-            time.sleep(3)
-    raise Exception("No fue posible conectar con MySQL después de 10 intentos")
-
-
-def consultar(sql, valores=None):
-    conn = conectar()
-    cur = conn.cursor(dictionary=True)
-    cur.execute(sql, valores)
-    filas = cur.fetchall()
-    conn.close()
-    return filas
-
-
-def ejecutar(sql, valores=None):
-    conn = conectar()
-    cur = conn.cursor()
-    cur.execute(sql, valores)
-    conn.commit()
-    conn.close()
-
-
-def error(msg, codigo):
-    return jsonify({"error": msg}), codigo
-
-
-CLIENTES_URL = os.getenv("CLIENTES_URL")
-ASESORES_URL = os.getenv("ASESORES_URL")
-ESTADOS = ["en_espera", "en_atencion", "atendido", "cancelado"]
-
-
-HTTP_TIMEOUT = float(os.getenv("HTTP_TIMEOUT", "2"))
 circuito_clientes = pybreaker.CircuitBreaker(
     fail_max=int(os.getenv("CB_MAX_FALLOS", "3")),
     reset_timeout=int(os.getenv("CB_RECUPERACION", "30")),
-    throw_new_error_on_trip=False,
+    throw_new_error_on_trip=False
 )
+
 circuito_asesores = pybreaker.CircuitBreaker(
     fail_max=int(os.getenv("CB_MAX_FALLOS", "3")),
     reset_timeout=int(os.getenv("CB_RECUPERACION", "30")),
-    throw_new_error_on_trip=False,
+    throw_new_error_on_trip=False
 )
 
-
-def pedir(circuito, url):
-    
-    try:
-        with circuito.calling():
-            r = requests.get(url, timeout=HTTP_TIMEOUT)
-            if r.status_code >= 500:
-                r.raise_for_status()
-    except pybreaker.CircuitBreakerError:
-        return None, "circuito_abierto"
-    except requests.exceptions.Timeout:
-        return None, "timeout"
-    except requests.exceptions.ConnectionError:
-        return None, "caido"
-    except requests.exceptions.HTTPError:
-        return None, "error_servidor"
-    if r.status_code == 200:
-        return r.json(), "ok"
-    if r.status_code == 404:
-        return None, "no_existe"
-    return None, "error_servidor"
+estados_validos = ["en_espera", "en_atencion", "atendido", "cancelado"]
 
 
-def error_por_estado(estado, recurso):
-    if estado == "timeout":
-        return error(f"El servicio de {recurso} no responde", 504)
-    if estado == "circuito_abierto":
-        return error(f"Circuito abierto: servicio de {recurso} no disponible", 503)
-    if estado == "caido":
-        return error(f"Servicio de {recurso} no disponible", 503)
-    if estado == "error_servidor":
-        return error(f"Error en el servicio de {recurso}", 502)
-    return None
-
-
-def validar(circuito, base_url, recurso, id, nombre):
-
-    _, estado = pedir(circuito, f"{base_url}/{recurso}/{id}")
-    if estado == "no_existe":
-        return error(f"{nombre} inexistente", 404)
-    return error_por_estado(estado, recurso)
-
-
-def buscar_turno(id):
-    filas = consultar("SELECT * FROM turnos WHERE id=%s", (id,))
-    if not filas:
-        return None
-    turno = filas[0]
-    turno["creado"] = str(turno["creado"])
-    return turno
-
-@app.get("/turnos")
+@app.route("/turnos", methods=["GET"])
 def listar():
-    turnos = consultar("SELECT * FROM turnos")
-    for t in turnos:
-        t["creado"] = str(t["creado"])
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM turnos")
+    turnos = cursor.fetchall()
+    cursor.close()
+    conexion.close()
     return jsonify(turnos)
 
 
-@app.get("/turnos/<int:id>")
-def obtener(id):
-    turno = buscar_turno(id)
-    if not turno:
-        return error("Turno no encontrado", 404)
+@app.route("/turnos/<int:id>", methods=["GET"])
+def buscar(id):
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+    sql = """
+        SELECT * FROM turnos
+        WHERE id = %s
+    """
+    cursor.execute(sql, (id,))
+    turno = cursor.fetchone()
+    cursor.close()
+    conexion.close()
+    if turno is None:
+        return jsonify({"mensaje": "Turno no encontrado"}), 404
     return jsonify(turno)
 
 
-@app.post("/turnos")
+@app.route("/turnos", methods=["POST"])
 def crear():
-    datos = request.get_json(silent=True) or {}
-    if not datos.get("cliente_id"):
-        return error("cliente_id es obligatorio", 400)
-    err = validar(circuito_clientes, CLIENTES_URL, "clientes", datos["cliente_id"], "Cliente")
-    if err:
-        return err
-    asesor_id = datos.get("asesor_id")
-    if asesor_id:
-        err = validar(circuito_asesores, ASESORES_URL, "asesores", asesor_id, "Asesor")
-        if err:
-            return err
-    ejecutar(
-        "INSERT INTO turnos (cliente_id, asesor_id, tramite) VALUES (%s, %s, %s)",
-        (datos["cliente_id"], asesor_id, datos.get("tramite", "general")),
-    )
-    nuevo = consultar("SELECT * FROM turnos ORDER BY id DESC LIMIT 1")[0]
-    ejecutar("UPDATE turnos SET codigo=%s WHERE id=%s", (f"T-{nuevo['id']:03d}", nuevo["id"]))
-    return jsonify(buscar_turno(nuevo["id"])), 201
+    nuevoTurno = request.json
+    if "cliente_id" not in nuevoTurno:
+        return jsonify({"mensaje": "El campo cliente_id es obligatorio"}), 400
+    tramite = nuevoTurno.get("tramite", "general")
+    tiempo_maximo = float(os.getenv("CLIENTES_TIMEOUT", "2"))
+    url = os.getenv("CLIENTES_URL") + "/clientes/" + str(nuevoTurno["cliente_id"])
+    try:
+        with circuito_clientes.calling():
+            respuesta = requests.get(url, timeout=tiempo_maximo)
+            if respuesta.status_code >= 500:
+                respuesta.raise_for_status()
+    except pybreaker.CircuitBreakerError:
+        return jsonify({"mensaje": "Circuito abierto: Clientes no disponible"}), 503
+    except requests.exceptions.Timeout:
+        return jsonify({"mensaje": "El servicio de clientes no responde"}), 504
+    except requests.exceptions.ConnectionError:
+        return jsonify({"mensaje": "No se pudo conectar con el servicio de clientes"}), 503
+    except requests.exceptions.HTTPError:
+        return jsonify({"mensaje": "Error en el servicio de clientes"}), 502
+
+    if respuesta.status_code == 404:
+        return jsonify({"mensaje": "Cliente no encontrado"}), 404
+    if respuesta.status_code != 200:
+        return jsonify({"mensaje": "Error en el servicio de clientes"}), 502
+
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+    sql = """
+        INSERT INTO turnos
+        (cliente_id, tramite)
+        VALUES (%s, %s)
+    """
+    valores = (nuevoTurno["cliente_id"], tramite)
+    cursor.execute(sql, valores)
+    conexion.commit()
+    nuevo_id = cursor.lastrowid
+    codigo = "T-" + str(nuevo_id).zfill(3)
+    cursor.execute(
+        "UPDATE turnos SET codigo = %s WHERE id = %s", (codigo, nuevo_id))
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    return jsonify({"mensaje": "Turno creado", "id": nuevo_id, "codigo": codigo}), 201
 
 
-@app.put("/turnos/<int:id>")
+@app.route("/turnos/<int:id>", methods=["PUT"])
 def actualizar(id):
-    actual = buscar_turno(id)
-    if not actual:
-        return error("Turno no encontrado", 404)
-    datos = request.get_json(silent=True) or {}
-    estado = datos.get("estado", actual["estado"])
-    if estado not in ESTADOS:
-        return error("Estado inválido. Use: " + ", ".join(ESTADOS), 400)
-    asesor_id = datos.get("asesor_id", actual["asesor_id"])
-    if "asesor_id" in datos and asesor_id:
-        err = validar(circuito_asesores, ASESORES_URL, "asesores", asesor_id, "Asesor")
-        if err:
-            return err
-    ejecutar(
-        "UPDATE turnos SET estado=%s, asesor_id=%s, tramite=%s WHERE id=%s",
-        (estado, asesor_id, datos.get("tramite", actual["tramite"]), id),
-    )
-    return jsonify(buscar_turno(id))
+    datos = request.json
+    for campo in ["tramite", "estado", "asesor_id"]:
+        if campo not in datos:
+            return jsonify({"mensaje": "El campo " + campo + " es obligatorio"}), 400
+    if datos["estado"] not in estados_validos:
+        return jsonify({"mensaje": "Estado inválido"}), 400
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * FROM turnos WHERE id = %s", (id,))
+    turno = cursor.fetchone()
+    if turno is None:
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje": "Turno no encontrado"}), 404
+    sql = """
+        UPDATE turnos
+        SET tramite = %s, estado = %s, asesor_id = %s WHERE id = %s
+    """
+    valores = (datos["tramite"], datos["estado"], datos["asesor_id"], id)
+    cursor.execute(sql, valores)
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    return jsonify({"mensaje": "Turno actualizado"})
 
 
-@app.delete("/turnos/<int:id>")
-def eliminar(id):
-    if not buscar_turno(id):
-        return error("Turno no encontrado", 404)
-    ejecutar("DELETE FROM turnos WHERE id=%s", (id,))
-    return jsonify({"mensaje": "Turno eliminado"})
-
-@app.get("/turnos/<int:id>/detalle")
-def detalle(id):
-    turno = buscar_turno(id)
-    if not turno:
-        return error("Turno no encontrado", 404)
-
-    cliente, estado = pedir(circuito_clientes, f"{CLIENTES_URL}/clientes/{turno['cliente_id']}")
-    err = error_por_estado(estado, "clientes")
-    if err:
-        return err
-    asesor = None
-    if turno["asesor_id"]:
-        asesor, estado = pedir(circuito_asesores, f"{ASESORES_URL}/asesores/{turno['asesor_id']}")
-        err = error_por_estado(estado, "asesores")
-        if err:
-            return err
-    turno["cliente"] = cliente
-    turno["asesor"] = asesor
-    return jsonify(turno)
-
-
-
-@app.get("/turnos/circuito")
-def estado_circuito():
+@app.route("/turnos/<int:id>", methods=["PATCH"])
+def modificar(id):
+    datos = request.json
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * FROM turnos WHERE id = %s", (id,))
+    turno = cursor.fetchone()
+    if turno is None:
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje": "Turno no encontrado"}), 404
+    tramite = datos.get("tramite", turno["tramite"])
+    estado = datos.get("estado", turno["estado"])
+    asesor_id = datos.get("asesor_id", turno["asesor_id"])
+    if estado not in estados_validos:
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje": "Estado inválido"}), 400
+    sql = """
+        UPDATE turnos
+        SET tramite = %s, estado = %s, asesor_id = %s WHERE id = %s
+    """
+    valores = (tramite, estado, asesor_id, id)
+    cursor.execute(sql, valores)
+    conexion.commit()
+    cursor.close()
+    conexion.close()
     return jsonify({
-        "clientes": {
-            "estado": circuito_clientes.current_state.upper(),
-            "fallos_consecutivos": circuito_clientes.fail_counter,
-            "periodo_recuperacion": circuito_clientes.reset_timeout,
-        },
-        "asesores": {
-            "estado": circuito_asesores.current_state.upper(),
-            "fallos_consecutivos": circuito_asesores.fail_counter,
-            "periodo_recuperacion": circuito_asesores.reset_timeout,
-        },
+        "mensaje": "Turno modificado",
+        "id": id,
+        "estado": estado,
+        "asesor_id": asesor_id
     })
 
 
+@app.route("/turnos/<int:id>", methods=["DELETE"])
+def eliminar(id):
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * FROM turnos WHERE id = %s", (id,))
+    turno = cursor.fetchone()
+    if turno is None:
+        cursor.close()
+        conexion.close()
+        return jsonify({"mensaje": "Turno no encontrado"}), 404
+    cursor.execute(
+        "DELETE FROM turnos WHERE id = %s", (id,))
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    return jsonify({"mensaje": "Turno eliminado"})
+
+
+@app.route("/turnos/<int:id>/detalle", methods=["GET"])
+def detalle(id):
+    conexion = conectar()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * FROM turnos WHERE id = %s", (id,))
+    turno = cursor.fetchone()
+    cursor.close()
+    conexion.close()
+    if turno is None:
+        return jsonify({"mensaje": "Turno no encontrado"}), 404
+
+    # Turnos -> Clientes
+    tiempo_maximo = float(os.getenv("CLIENTES_TIMEOUT", "2"))
+    url = os.getenv("CLIENTES_URL") + "/clientes/" + str(turno["cliente_id"])
+    try:
+        with circuito_clientes.calling():
+            respuesta = requests.get(url, timeout=tiempo_maximo)
+            if respuesta.status_code >= 500:
+                respuesta.raise_for_status()
+    except pybreaker.CircuitBreakerError:
+        return jsonify({"mensaje": "Circuito abierto: Clientes no disponible"}), 503
+    except requests.exceptions.Timeout:
+        return jsonify({"mensaje": "El servicio de clientes no responde"}), 504
+    except requests.exceptions.ConnectionError:
+        return jsonify({"mensaje": "No se pudo conectar con el servicio de clientes"}), 503
+    except requests.exceptions.HTTPError:
+        return jsonify({"mensaje": "Error en el servicio de clientes"}), 502
+
+    if respuesta.status_code == 404:
+        return jsonify({"mensaje": "Cliente no encontrado"}), 404
+    if respuesta.status_code != 200:
+        return jsonify({"mensaje": "Error en el servicio de clientes"}), 502
+    cliente = respuesta.json()
+
+ 
+    asesor = None
+    if turno["asesor_id"] is not None:
+        tiempo_maximo = float(os.getenv("ASESORES_TIMEOUT", "2"))
+        url = os.getenv("ASESORES_URL") + "/asesores/" + str(turno["asesor_id"])
+        try:
+            with circuito_asesores.calling():
+                respuesta = requests.get(url, timeout=tiempo_maximo)
+                if respuesta.status_code >= 500:
+                    respuesta.raise_for_status()
+        except pybreaker.CircuitBreakerError:
+            return jsonify({"mensaje": "Circuito abierto: Asesores no disponible"}), 503
+        except requests.exceptions.Timeout:
+            return jsonify({"mensaje": "El servicio de asesores no responde"}), 504
+        except requests.exceptions.ConnectionError:
+            return jsonify({"mensaje": "No se pudo conectar con el servicio de asesores"}), 503
+        except requests.exceptions.HTTPError:
+            return jsonify({"mensaje": "Error en el servicio de asesores"}), 502
+
+        if respuesta.status_code == 404:
+            return jsonify({"mensaje": "Asesor no encontrado"}), 404
+        if respuesta.status_code != 200:
+            return jsonify({"mensaje": "Error en el servicio de asesores"}), 502
+        asesor = respuesta.json()
+
+    return jsonify({
+        "turno": turno,
+        "cliente": cliente,
+        "asesor": asesor
+    }), 200
+
+
+@app.route("/turnos/circuito/clientes", methods=["GET"])
+def estado_circuito_clientes():
+    return jsonify({
+        "estado": circuito_clientes.current_state.upper(),
+        "fallos_consecutivos": circuito_clientes.fail_counter,
+        "umbral_fallas": circuito_clientes.fail_max,
+        "periodo_recuperacion": circuito_clientes.reset_timeout
+    }), 200
+
+
+@app.route("/turnos/circuito/asesores", methods=["GET"])
+def estado_circuito_asesores():
+    return jsonify({
+        "estado": circuito_asesores.current_state.upper(),
+        "fallos_consecutivos": circuito_asesores.fail_counter,
+        "umbral_fallas": circuito_asesores.fail_max,
+        "periodo_recuperacion": circuito_asesores.reset_timeout
+    }), 200
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5003")))
+    app.run(host="0.0.0.0", port=5000)
