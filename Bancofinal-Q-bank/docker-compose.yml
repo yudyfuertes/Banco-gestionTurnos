@@ -1,8 +1,8 @@
 services:
   home:
-      build: ./home
-      ports:
-        - "8080:80"
+    build: ./home
+    ports:
+      - "8080:80"
 
   mysql_clientes:
     image: mysql:8.0
@@ -16,14 +16,15 @@ services:
       - "${CLIENTES_MYSQL_HOST_PORT}:3306"
     volumes:
       - clientes_data:/var/lib/mysql
+      - ./bases_datos/clientes.sql:/docker-entrypoint-initdb.d/clientes.sql
 
   clientes:
     build: ./clientes
     container_name: servicio_clientes
+    ports:
+      - "${CLIENTES_PORT}:5000"
     env_file:
       - ./clientes/.env
-    ports:
-      - "${CLIENTES_PORT}:${CLIENTES_PORT}"
     depends_on:
       - mysql_clientes
 
@@ -39,14 +40,15 @@ services:
       - "${ASESORES_MYSQL_HOST_PORT}:3306"
     volumes:
       - asesores_data:/var/lib/mysql
+      - ./bases_datos/asesores.sql:/docker-entrypoint-initdb.d/asesores.sql
 
   asesores:
     build: ./asesores
     container_name: servicio_asesores
+    ports:
+      - "${ASESORES_PORT}:5000"
     env_file:
       - ./asesores/.env
-    ports:
-      - "${ASESORES_PORT}:${ASESORES_PORT}"
     depends_on:
       - mysql_asesores
 
@@ -62,14 +64,15 @@ services:
       - "${TURNOS_MYSQL_HOST_PORT}:3306"
     volumes:
       - turnos_data:/var/lib/mysql
+      - ./bases_datos/turnos.sql:/docker-entrypoint-initdb.d/turnos.sql
 
   turnos:
     build: ./turnos
     container_name: servicio_turnos
+    ports:
+      - "${TURNOS_PORT}:5000"
     env_file:
       - ./turnos/.env
-    ports:
-      - "${TURNOS_PORT}:${TURNOS_PORT}"
     depends_on:
       - mysql_turnos
 
