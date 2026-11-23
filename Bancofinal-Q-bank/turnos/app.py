@@ -21,9 +21,16 @@ estados_validos = ["en_espera", "en_atencion", "atendido", "cancelado"]
 
 @app.route("/turnos", methods=["GET"])
 def listar():
+    estado = request.args.get("estado")
+    cliente_id = request.args.get("cliente_id")
     conexion = conectar()
     cursor = conexion.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM turnos")
+    if estado:
+        cursor.execute("SELECT * FROM turnos WHERE estado = %s", (estado,))
+    elif cliente_id:
+        cursor.execute("SELECT * FROM turnos WHERE cliente_id = %s", (cliente_id,))
+    else:
+        cursor.execute("SELECT * FROM turnos")
     turnos = cursor.fetchall()
     cursor.close()
     conexion.close()
@@ -85,7 +92,7 @@ def crear():
     cursor.execute(sql, valores)
     conexion.commit()
     nuevo_id = cursor.lastrowid
-    codigo = "T-" + str(nuevo_id).zfill(3)
+    codigo = "T-" + str(nuevo_id)
     cursor.execute(
         "UPDATE turnos SET codigo = %s WHERE id = %s", (codigo, nuevo_id))
     conexion.commit()
@@ -213,7 +220,7 @@ def detalle(id):
         return jsonify({"mensaje": "Error en el servicio de clientes"}), 502
     cliente = respuesta.json()
 
- 
+    # Turnos -> Asesores (solo si el turno ya tiene asesor)
     asesor = None
     if turno["asesor_id"] is not None:
         tiempo_maximo = float(os.getenv("ASESORES_TIMEOUT", "2"))
@@ -265,5 +272,4 @@ def estado_circuito_asesores():
     }), 200
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+app.run(host="0.0.0.0", port=5000)
