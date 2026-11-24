@@ -4,79 +4,129 @@ services:
     ports:
       - "8080:80"
 
+  gateway:
+    build: ./gateway
+    container_name: api_gateway
+    ports:
+      - "5000:5000"
+    environment:
+      CLIENTES_URL: ${CLIENTES_URL}
+      ASESORES_URL: ${ASESORES_URL}
+      TURNOS_URL: ${TURNOS_URL}
+      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL}
+    depends_on:
+      - clientes
+      - asesores
+      - turnos
+      - notificaciones
+
+  clientes:
+    build: ./clientes
+    container_name: servicio_clientes
+    ports:
+      - "5001:5000"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${CLIENTES_DB_HOST}
+      DB_NAME: ${CLIENTES_DB_NAME}
+      DB_PASSWORD: ${CLIENTES_DB_PASSWORD}
+    depends_on:
+      - mysql_clientes
+
   mysql_clientes:
     image: mysql:8.0
     container_name: mysql_clientes
     environment:
-      MYSQL_ROOT_PASSWORD: ${CLIENTES_DB_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${CLIENTES_DB_PASSWORD}
       MYSQL_DATABASE: ${CLIENTES_DB_NAME}
-      MYSQL_USER: ${CLIENTES_DB_USER}
-      MYSQL_PASSWORD: ${CLIENTES_DB_PASSWORD}
     ports:
       - "${CLIENTES_MYSQL_HOST_PORT}:3306"
     volumes:
       - clientes_data:/var/lib/mysql
       - ./bases_datos/clientes.sql:/docker-entrypoint-initdb.d/clientes.sql
 
-  clientes:
-    build: ./clientes
-    container_name: servicio_clientes
+  asesores:
+    build: ./asesores
+    container_name: servicio_asesores
     ports:
-      - "${CLIENTES_PORT}:5000"
+      - "5002:5000"
     env_file:
-      - ./clientes/.env
+      - .env
+    environment:
+      DB_HOST: ${ASESORES_DB_HOST}
+      DB_NAME: ${ASESORES_DB_NAME}
+      DB_PASSWORD: ${ASESORES_DB_PASSWORD}
     depends_on:
-      - mysql_clientes
+      - mysql_asesores
 
   mysql_asesores:
     image: mysql:8.0
     container_name: mysql_asesores
     environment:
-      MYSQL_ROOT_PASSWORD: ${ASESORES_DB_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${ASESORES_DB_PASSWORD}
       MYSQL_DATABASE: ${ASESORES_DB_NAME}
-      MYSQL_USER: ${ASESORES_DB_USER}
-      MYSQL_PASSWORD: ${ASESORES_DB_PASSWORD}
     ports:
       - "${ASESORES_MYSQL_HOST_PORT}:3306"
     volumes:
       - asesores_data:/var/lib/mysql
       - ./bases_datos/asesores.sql:/docker-entrypoint-initdb.d/asesores.sql
 
-  asesores:
-    build: ./asesores
-    container_name: servicio_asesores
+  turnos:
+    build: ./turnos
+    container_name: servicio_turnos
     ports:
-      - "${ASESORES_PORT}:5000"
+      - "5003:5000"
     env_file:
-      - ./asesores/.env
+      - .env
+    environment:
+      DB_HOST: ${TURNOS_DB_HOST}
+      DB_NAME: ${TURNOS_DB_NAME}
+      DB_PASSWORD: ${TURNOS_DB_PASSWORD}
     depends_on:
-      - mysql_asesores
+      - mysql_turnos
 
   mysql_turnos:
     image: mysql:8.0
     container_name: mysql_turnos
     environment:
-      MYSQL_ROOT_PASSWORD: ${TURNOS_DB_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${TURNOS_DB_PASSWORD}
       MYSQL_DATABASE: ${TURNOS_DB_NAME}
-      MYSQL_USER: ${TURNOS_DB_USER}
-      MYSQL_PASSWORD: ${TURNOS_DB_PASSWORD}
     ports:
       - "${TURNOS_MYSQL_HOST_PORT}:3306"
     volumes:
       - turnos_data:/var/lib/mysql
       - ./bases_datos/turnos.sql:/docker-entrypoint-initdb.d/turnos.sql
 
-  turnos:
-    build: ./turnos
-    container_name: servicio_turnos
+  notificaciones:
+    build: ./notificaciones
+    container_name: servicio_notificaciones
     ports:
-      - "${TURNOS_PORT}:5000"
+      - "5004:5000"
     env_file:
-      - ./turnos/.env
+      - .env
+    environment:
+      DB_HOST: ${NOTIFICACIONES_DB_HOST}
+      DB_NAME: ${NOTIFICACIONES_DB_NAME}
+      DB_PASSWORD: ${NOTIFICACIONES_DB_PASSWORD}
     depends_on:
-      - mysql_turnos
+      - mysql_notificaciones
+
+  mysql_notificaciones:
+    image: mysql:8.0
+    container_name: mysql_notificaciones
+    environment:
+      MYSQL_ROOT_PASSWORD: ${NOTIFICACIONES_DB_PASSWORD}
+      MYSQL_DATABASE: ${NOTIFICACIONES_DB_NAME}
+    ports:
+      - "${NOTIFICACIONES_MYSQL_HOST_PORT}:3306"
+    volumes:
+      - notificaciones_data:/var/lib/mysql
+      - ./bases_datos/notificaciones.sql:/docker-entrypoint-initdb.d/notificaciones.sql
 
 volumes:
   clientes_data:
   asesores_data:
   turnos_data:
+  notificaciones_data:
+
