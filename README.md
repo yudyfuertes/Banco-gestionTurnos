@@ -759,13 +759,15 @@ Notificaciones → Turnos           consulta cliente y ventanilla
 
 ## Microservicios
 
-| Clientes | Registrar y administrar clientes | `clientes_db` | Terminado |
-| Asesores | Administrar asesores y ventanillas; atender y finalizar turnos | `asesores_db` | Terminado |
-| Turnos | Crear turnos y controlar su estado | 
-`turnos_db` | Terminado |
-| Notificaciones | Avisar al cliente cuando se llama su turno | 
-`notificaciones_db` | Terminado |
-| Gateway | Punto de entrada único, reenvía a los servicios  | Terminado |
-| Home | Página web para los clientes | Terminado |
+## Estado de los módulos
+
+| Módulo | Funcionalidad | Base de datos | Estado |
+|:---:|:---|:---:|:---:|
+| Clientes | Registro y administración de clientes | `clientes_db` | Terminado |
+| Asesores | Gestión de asesores y ventanillas, atención y finalización de turnos | `asesores_db` | Terminado |
+| Turnos | Creación de turnos y gestión de sus estados | `turnos_db` | Terminado |
+| Notificaciones | Notificación al cliente cuando su turno es llamado | `notificaciones_db` | Terminado |
+| Gateway | Punto de entrada único y enrutamiento de solicitudes hacia los servicios | — | Terminado |
+| Home | Interfaz web principal para los clientes | — | Terminado |
 
 Cada servicio corre en su propio contenedor (Flask, puerto 5000 interno) y solo accede a su propia base de datos.
