@@ -725,3 +725,47 @@ A partir de lo anterior, se pueden incluir las mejoras y correcciones mencionada
 La propuesta es coherente con una arquitectura de microservicios, ya que permite dividir el sistema en servicios independientes que pueden escalar y evolucionar de manera individual.
 
 Sin embargo, es importante definir correctamente las responsabilidades de cada servicio, la comunicación entre ellos, el manejo de fallos y la consistencia de los datos.
+
+
+### TERCER AVANCE
+# Q-Bank — Gestión de turnos bancarios
+
+Sistema distribuido (microservicios) para digitalizar la atención presencial en un banco: el cliente toma un turno, el sistema lo registra, el asesor lo llama desde su ventanilla y el cliente recibe el aviso.
+
+## Arquitectura
+
+```
+Cliente → Home (8080) → Gateway (5000) → Clientes | Asesores | Turnos | Notificaciones
+ mysql_clientes (3307)
+mysql_asesores (3308)
+mysql_turnos (3309)
+mysql_notificaciones (3310)
+```
+
+## Comunicación entre servicios (HTTP, con Timeout y Circuit Breaker):
+
+```
+Clientes       → Turnos           pide crear un turno
+Turnos         → Clientes         valida y consulta al cliente
+Turnos         → Asesores         consulta al asesor
+Asesores       → Turnos           atiende y finaliza el turno
+Asesores       → Notificaciones   avisa al cliente
+Notificaciones → Turnos           consulta cliente y ventanilla
+```
+
+## Arquitectura actualizada
+
+<img width="799" height="510" alt="arquitectura" src="https://github.com/user-attachments/assets/0b234923-b5bd-4fd4-850c-2ba4830334ae" />
+
+## Microservicios
+
+| Clientes | Registrar y administrar clientes | `clientes_db` | Terminado |
+| Asesores | Administrar asesores y ventanillas; atender y finalizar turnos | `asesores_db` | Terminado |
+| Turnos | Crear turnos y controlar su estado | 
+`turnos_db` | Terminado |
+| Notificaciones | Avisar al cliente cuando se llama su turno | 
+`notificaciones_db` | Terminado |
+| Gateway | Punto de entrada único, reenvía a los servicios  | Terminado |
+| Home | Página web para los clientes | Terminado |
+
+Cada servicio corre en su propio contenedor (Flask, puerto 5000 interno) y solo accede a su propia base de datos.
