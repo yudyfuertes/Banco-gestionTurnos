@@ -771,3 +771,39 @@ Notificaciones → Turnos           consulta cliente y ventanilla
 | Home | Interfaz web principal para los clientes | — | Terminado |
 
 Cada servicio corre en su propio contenedor (Flask, puerto 5000 interno) y solo accede a su propia base de datos.
+## API Gateway
+
+El gateway (`gateway/`) recibe todas las peticiones y las reenvía al servicio según la ruta, con el mismo método y cuerpo:
+
+| Ruta | Servicio |
+|---|---|
+| `/clientes...` | Clientes |
+| `/asesores...` | Asesores |
+| `/turnos...` | Turnos |
+| `/notificaciones...` | Notificaciones |
+
+Si el servicio no responde en 5 segundos devuelve 504; si no se puede conectar, 503.
+
+## Home
+
+Página web (HTML, CSS y JS con Nginx) que solo se comunica con el gateway: ver turnos en pantalla, pedir un turno con el documento y consultar el estado del turno propio.
+
+Las acciones del asesor (llamar y finalizar turno) se hacen con Thunder Client o Postman por el gateway.
+
+## Configuración (`.env`)
+
+Un solo `.env` en la raíz.
+
+Se define por servicio: `<SERVICIO>_DB_HOST`, `_DB_NAME`, `_DB_PASSWORD` y `_MYSQL_HOST_PORT`.
+
+Comunes: `DB_PORT=3306`, `DB_USER=root`, las URLs de los servicios, los timeouts y `CB_MAX_FALLOS` / `CB_RECUPERACION`.
+
+El compose entrega a cada servicio sus variables `DB_*`.
+
+## Pruebas
+
+
+
+## Estado actual
+
+**Terminado:** los 4 servicios con CRUD, bases independientes con volumen, comunicación HTTP, Timeout, Circuit Breaker, gateway, home y Docker Compose.
