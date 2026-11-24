@@ -1022,150 +1022,92 @@ td.vacia {
 
 
 /* =========================
-   TRÁMITES POR ASESOR
+   INTERFAZ DE CLIENTES
 ========================== */
 
-.chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 14px;
-    border: 1px solid #c9d9ea;
-    background-color: white;
-    color: #45566f;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
-}
-
-.chip input {
-    width: auto;
-    margin: 0;
-    accent-color: #0756a3;
-}
-
-.chip.activo {
-    background-color: #e7f2ff;
-    border-color: #0876d1;
-    color: #0756a3;
-}
-
-.asesor-tramites {
-    margin-bottom: 14px;
-}
-
-.asesor-tramites small {
-    display: block;
-    margin-bottom: 6px;
-    color: #718096;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.asesor-turno small {
-    color: #718096;
-}
-
-.chips-form {
-    flex-basis: 100%;
-    align-items: center;
-}
-
-.chips-titulo {
+.pantalla-lista {
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px solid #edf1f5;
     font-size: 13px;
-    font-weight: 600;
-    color: #45566f;
-    margin-right: 4px;
+    color: #718096;
+    text-align: center;
 }
 
-/* Ajustes: texto en negrita dentro del ticket y chips dentro de formularios */
-.ticket p strong {
-    font-size: inherit;
-    margin: 0;
+.mi-turno {
+    max-width: 640px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border: 1px solid #e4ebf3;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(24, 71, 120, 0.08);
 }
 
-.formulario .chip {
-    flex-direction: row;
-    gap: 5px;
-    padding: 4px 10px;
-    font-size: 12px;
-    width: auto;
-}
-
-.formulario .chip input {
-    width: auto;
-    padding: 0;
-}
-
-.formulario-linea .chip {
-    flex: 0 0 auto;
-    justify-content: flex-start;
-}
-
-.formulario .chip input,
-.formulario-linea .chip input {
-    flex: none;
-    min-width: 0;
-    width: auto;
-}
-
-
-/* =========================
-   FILAS POR ESTADO / ASESORES
-========================== */
-
-.fila-titulo {
-    max-width: 1000px;
-    margin: 34px auto 12px;
-    color: #1d3c5e;
-    font-size: 18px;
+.mi-turno-cabecera {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    margin-bottom: 18px;
 }
 
-.fila-titulo:first-child {
-    margin-top: 0;
-}
-
-.contador {
-    background-color: #e7f2ff;
+.mi-codigo {
+    font-size: 48px;
+    font-weight: bold;
     color: #0756a3;
+}
+
+.mi-turno p {
+    color: #45566f;
+    line-height: 1.6;
+}
+
+.aviso-llamado {
+    margin-top: 18px;
+    background: linear-gradient(135deg, #0756a3, #0876d1);
+    color: white;
     border-radius: 12px;
-    padding: 2px 10px;
-    font-size: 13px;
+    padding: 20px;
+    text-align: center;
 }
 
-.chip.fijo {
-    cursor: default;
+.aviso-llamado strong {
+    display: block;
+    font-size: 40px;
+    margin: 6px 0;
 }
 
-.asignar-linea {
+.aviso-llamado small {
+    opacity: 0.9;
+}
+
+.mi-turno-acciones {
+    margin-top: 22px;
     display: flex;
-    gap: 8px;
-    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.asignar-linea select {
-    flex: 1;
-    padding: 6px 8px;
-    font-size: 13px;
+.consulta-documento {
+    max-width: 640px;
+    margin: 22px auto 0;
+    text-align: center;
 }
 
-.mini:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+.consulta-documento .formulario-linea {
+    margin-top: 10px;
 }
 
-.mini:disabled:hover {
-    background-color: white;
+.consulta-documento p {
+    color: #718096;
+    font-size: 14px;
+}
+
+.fuera-de-linea {
+    background-color: #fdeaea;
+    color: #c0392b;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
 }

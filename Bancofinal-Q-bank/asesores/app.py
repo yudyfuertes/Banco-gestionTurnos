@@ -10,6 +10,12 @@ circuito_turnos = pybreaker.CircuitBreaker(
     throw_new_error_on_trip=False
 )
 
+circuito_notificaciones = pybreaker.CircuitBreaker(
+    fail_max=int(os.getenv("CB_MAX_FALLOS", "3")),
+    reset_timeout=int(os.getenv("CB_RECUPERACION", "30")),
+    throw_new_error_on_trip=False
+)
+
 
 @app.route("/asesores", methods=["GET"])
 def listar():
@@ -177,7 +183,25 @@ def atender_turno(id, turno_id):
     conexion.commit()
     cursor.close()
     conexion.close()
-    return jsonify({"mensaje": "Turno en atención", "turno": respuesta.json()}), 200
+
+    # Comunicación: Asesores -> Notificaciones
+    # Si Notificaciones falla, la atención del turno no se cancela
+    notificacion = "enviada"
+    tiempo_maximo = float(os.getenv("NOTIFICACIONES_TIMEOUT", "2"))
+    url = os.getenv("NOTIFICACIONES_URL") + "/notificaciones"
+    try:
+        with circuito_notificaciones.calling():
+            respuesta = requests.post(
+                url, json={"turno_id": turno_id}, timeout=tiempo_maximo)
+            if respuesta.status_code >= 500:
+                respuesta.raise_for_status()
+    except pybreaker.CircuitBreakerError:
+        notificacion = "pendiente: circuito abierto"
+    except requests.exceptions.RequestException:
+        notificacion = "pendiente: servicio de notificaciones no disponible"
+    if notificacion == "enviada" and respuesta.status_code != 201:
+        notificacion = "pendiente: no se pudo crear"
+    return jsonify({"mensaje": "Turno en atención", "notificacion": notificacion}), 200
 
 
 @app.route("/asesores/<int:id>/finalizar-turno/<int:turno_id>", methods=["PUT"])
@@ -219,7 +243,17 @@ def finalizar_turno(id, turno_id):
     conexion.commit()
     cursor.close()
     conexion.close()
-    return jsonify({"mensaje": "Turno atendido", "turno": respuesta.json()}), 200
+    return jsonify({"mensaje": "Turno atendido"}), 200
+
+
+@app.route("/asesores/circuito/notificaciones", methods=["GET"])
+def estado_circuito_notificaciones():
+    return jsonify({
+        "estado": circuito_notificaciones.current_state.upper(),
+        "fallos_consecutivos": circuito_notificaciones.fail_counter,
+        "umbral_fallas": circuito_notificaciones.fail_max,
+        "periodo_recuperacion": circuito_notificaciones.reset_timeout
+    }), 200
 
 
 @app.route("/asesores/circuito/turnos", methods=["GET"])
@@ -232,5 +266,4 @@ def estado_circuito():
     }), 200
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+app.run(host="0.0.0.0", port=5000)

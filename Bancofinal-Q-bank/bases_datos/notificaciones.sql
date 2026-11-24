@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS notificaciones_db;
+USE notificaciones_db;
+
+CREATE TABLE IF NOT EXISTS notificaciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  turno_id INT NOT NULL,
+  texto VARCHAR(255) NOT NULL,
+  estado VARCHAR(20) NOT NULL DEFAULT 'enviada',
+  creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
