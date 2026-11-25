@@ -1,5 +1,16 @@
 # Banco-gestionTurnos
 
+**Q-Bank** — Sistema distribuido de gestión de turnos bancarios basado en microservicios.
+
+## Contenido
+
+1. [Primer avance del proyecto](#primer-avance-del-proyecto)
+2. [Segundo avance: implementación de servicios](#implementación-de-servicios)
+3. [Guía de actividad 2: arquitectura del sistema](#parte-1--entender-el-problema)
+4. [Tercer avance: gateway, notificaciones y tolerancia a fallos](#tercer-avance)
+
+> Las secciones de los avances anteriores se conservan como registro del proceso. La versión vigente de la arquitectura, los endpoints y la configuración está en el **[Tercer avance](#tercer-avance)**.
+
 # Primer avance del proyecto
 
 **Nombre del proyecto:** Q-bank
@@ -191,7 +202,7 @@ Se definieron las responsabilidades de cada servicio, la información que admini
 |---|---|---|---|
 | Clientes | Registrar, consultar, actualizar y eliminar clientes del banco. | `id`, nombre, documento único y teléfono. | No consulta otros servicios. Es consultado por Turnos mediante `GET /clientes/{id}`. |
 | Asesores | Registrar, consultar, actualizar y eliminar asesores y sus ventanillas. | `id`, nombre, ventanilla y estado (por defecto, disponible). | No consulta otros servicios. Es consultado por Turnos mediante `GET /asesores/{id}`. |
-| Turnos | Crear turnos, asignarles un asesor y controlar su estado. | `id`, código (T-001), `cliente_id`, `asesor_id`, trámite, estado y fecha de creación. | Se comunica mediante REST con Clientes y Asesores para validar su existencia y obtener la información necesaria para mostrar el detalle del
+| Turnos | Crear turnos, asignarles un asesor y controlar su estado. | `id`, código (T-001), `cliente_id`, `asesor_id`, trámite, estado y fecha de creación. | Se comunica mediante REST con Clientes y Asesores para validar su existencia y obtener la información necesaria para mostrar el detalle del turno. |
 
 ## IMPLEMENTACION DE APIS REST
 
@@ -210,6 +221,8 @@ Además, el servicio de Turnos expone `GET /turnos/{id}/detalle`, que combina lo
 ---
 
 ## DOCUMENTACION DE ENDPOINTS
+
+> **Nota:** esta documentación corresponde al segundo avance. En el tercer avance cambiaron los puertos internos, el formato del código del turno y se agregaron `PATCH` y el servicio de Notificaciones; ver [Endpoints actualizados](#endpoints-actualizados).
 
 Todos los errores se devuelven en formato JSON con la forma `{"error": "mensaje"}`. Las eliminaciones exitosas devuelven `{"mensaje": "... eliminado"}`.
 
@@ -442,11 +455,7 @@ services:
 
 ## Paso 1: Responder juntos
 
-## PARTE 1 — ENTENDER EL PROBLEMA
-
-### Paso 1: Responder juntos
-
-#### 1. ¿Qué problema resuelve el sistema?
+### 1. ¿Qué problema resuelve el sistema?
 
 El sistema distribuido del banco resuelve la gestión desorganizada en la atención al cliente. Estos llegan de manera simultánea a solicitar diferentes trámites como aperturas de cuentas, solicitar documentos, asesoría, transacciones en caja, reclamos, etc. Lo cual genera:
 
@@ -459,13 +468,13 @@ El sistema distribuido del banco resuelve la gestión desorganizada en la atenci
 
 Por lo anterior, surge la necesidad de identificar de forma segura al cliente y conectarlo con una sucursal bancaria en un tiempo acertado y un lugar cercano. Nuestro sistema resolverá este problema digitalizando la asignación de turnos: el cliente obtiene un turno, el sistema lo ordena según la prioridad del trámite seleccionado, y lo asigna automáticamente a la ventanilla o asesor disponible, notificando al cliente cuando deba acercarse.
 
-#### 2. ¿Quién lo usará?
+### 2. ¿Quién lo usará?
 
 - **Clientes del banco:** requieren un servicio presencial, se autentican, solicitan un turno, indican el trámite que desean realizar y reciben notificaciones.
 - **Asesores comerciales:** atienden trámites especializados desde su ventanilla, como créditos, tarjetas y cuentas nuevas.
 - **Supervisión de sucursales:** monitorea tiempos de atención y disponibilidad del personal.
 
-#### 3. ¿Qué pasaría si no existiera?
+### 3. ¿Qué pasaría si no existiera?
 
 - Si el sistema no existiera, se volvería un sistema por orden de llegada, por lo que no se podría diferenciar el tipo de trámite que el cliente necesita.
 - Los clientes no sabrían cuándo acercarse, generando aglomeraciones y aumentando el riesgo de errores en el orden de atención.
@@ -727,22 +736,29 @@ La propuesta es coherente con una arquitectura de microservicios, ya que permite
 Sin embargo, es importante definir correctamente las responsabilidades de cada servicio, la comunicación entre ellos, el manejo de fallos y la consistencia de los datos.
 
 
-### TERCER AVANCE
-# Q-Bank — Gestión de turnos bancarios
+# TERCER AVANCE
+
+## Q-Bank — Gestión de turnos bancarios
 
 Sistema distribuido (microservicios) para digitalizar la atención presencial en un banco: el cliente toma un turno, el sistema lo registra, el asesor lo llama desde su ventanilla y el cliente recibe el aviso.
+
+En este avance se agregaron el **servicio de Notificaciones**, el **API Gateway**, la **interfaz Home** conectada al gateway y los mecanismos de tolerancia a fallos **Timeout** y **Circuit Breaker** en todas las llamadas entre servicios.
 
 ## Arquitectura
 
 ```
-Cliente → Home (8080) → Gateway (5000) → Clientes | Asesores | Turnos | Notificaciones
- mysql_clientes (3307)
-mysql_asesores (3308)
-mysql_turnos (3309)
-mysql_notificaciones (3310)
+Cliente (navegador)
+   │
+   ▼
+Home (Nginx, 8080) ──► Gateway (5000) ──► Clientes (5001)       ──► mysql_clientes       (3307)
+                                       ├─► Asesores (5002)       ──► mysql_asesores       (3308)
+                                       ├─► Turnos (5003)         ──► mysql_turnos         (3309)
+                                       └─► Notificaciones (5004) ──► mysql_notificaciones (3310)
 ```
 
-## Comunicación entre servicios (HTTP, con Timeout y Circuit Breaker):
+Los puertos indicados son los del equipo anfitrión. Dentro de la red de Docker todos los servicios Flask escuchan en el puerto `5000` y se llaman por el nombre del servicio (por ejemplo, `http://turnos:5000`).
+
+## Comunicación entre servicios (HTTP, con Timeout y Circuit Breaker)
 
 ```
 Clientes       → Turnos           pide crear un turno
@@ -753,13 +769,24 @@ Asesores       → Notificaciones   avisa al cliente
 Notificaciones → Turnos           consulta cliente y ventanilla
 ```
 
+| Servicio que solicita | Servicio que responde | Endpoint utilizado | Cuándo ocurre |
+|---|---|---|---|
+| Clientes | Turnos | `POST /turnos` | El cliente solicita un turno (`POST /clientes/{id}/solicitar-turno`). |
+| Turnos | Clientes | `GET /clientes/{id}` | Al crear un turno (valida que el cliente exista) y al consultar `GET /turnos/{id}/detalle`. |
+| Turnos | Asesores | `GET /asesores/{id}` | Al consultar `GET /turnos/{id}/detalle` cuando el turno ya tiene asesor. |
+| Asesores | Turnos | `PATCH /turnos/{id}` | Al atender (`estado: en_atencion`) y al finalizar (`estado: atendido`) un turno. |
+| Asesores | Notificaciones | `POST /notificaciones` | Después de que el asesor toma el turno, para avisar al cliente. |
+| Notificaciones | Turnos | `GET /turnos/{id}/detalle` | Para obtener el código del turno, el nombre del cliente y la ventanilla. |
+
+Ningún servicio accede a la base de datos de otro: toda la información se obtiene por REST.
+
 ## Arquitectura actualizada
 
 <img width="799" height="510" alt="arquitectura" src="https://github.com/user-attachments/assets/0b234923-b5bd-4fd4-850c-2ba4830334ae" />
 
 ## Microservicios
 
-## Estado de los módulos
+### Estado de los módulos
 
 | Módulo | Funcionalidad | Base de datos | Estado |
 |:---:|:---|:---:|:---:|
@@ -771,9 +798,60 @@ Notificaciones → Turnos           consulta cliente y ventanilla
 | Home | Interfaz web principal para los clientes | — | Terminado |
 
 Cada servicio corre en su propio contenedor (Flask, puerto 5000 interno) y solo accede a su propia base de datos.
+
+### Estructura del proyecto
+
+```
+Bancofinal-Q-bank/
+├── docker-compose.yml
+├── .env                  # no se sube al repositorio (.gitignore)
+├── bases_datos/          # scripts SQL que crean las tablas y los datos de ejemplo
+│   ├── clientes.sql
+│   ├── asesores.sql
+│   ├── turnos.sql
+│   └── notificaciones.sql
+├── gateway/              # app.py, Dockerfile, requirements.txt
+├── clientes/             # app.py, database.py, Dockerfile, requirements.txt
+├── asesores/
+├── turnos/
+├── notificaciones/
+├── home/                 # index.html, style.css, app.js, nginx.conf, Dockerfile
+└── docs/arquitectura/    # diagramas
+```
+
+## Servicio de Notificaciones
+
+Es el nuevo servicio de este avance. Cuando un asesor toma un turno, Asesores le envía el `turno_id`; Notificaciones consulta el detalle del turno en Turnos y guarda el aviso para el cliente, por ejemplo:
+
+```
+Turno T-3 - Fernando: diríjase a la ventanilla 1
+```
+
+Si el turno todavía no tiene asesor asignado responde `409`, porque no sabe a qué ventanilla enviar al cliente.
+
+#### `notificaciones_db`
+
+| Campo | Tipo | Restricciones |
+|---|---|---|
+| `id` | `INT` | Llave primaria, `AUTO_INCREMENT` |
+| `turno_id` | `INT` | `NOT NULL`. Referencia lógica a `turnos.id` |
+| `texto` | `VARCHAR(255)` | `NOT NULL` |
+| `estado` | `VARCHAR(20)` | `NOT NULL`, valor por defecto `'enviada'` (`enviada` o `leida`) |
+| `creado` | `TIMESTAMP` | Valor por defecto `CURRENT_TIMESTAMP` |
+
+## Flujo completo de atención
+
+1. El cliente pide un turno con su documento desde Home (o con `POST /clientes/{id}/solicitar-turno`).
+2. Clientes llama a Turnos; Turnos valida al cliente en Clientes y crea el turno en estado `en_espera` con el código `T-{id}`.
+3. El asesor atiende el turno con `PUT /asesores/{id}/atender-turno/{turno_id}`: Turnos lo pasa a `en_atencion` con su `asesor_id`, y el asesor queda `ocupado`.
+4. Asesores llama a Notificaciones, que arma el aviso con la ventanilla del asesor.
+5. El asesor finaliza con `PUT /asesores/{id}/finalizar-turno/{turno_id}`: el turno pasa a `atendido` y el asesor vuelve a `disponible`.
+
+Estados válidos de un turno: `en_espera`, `en_atencion`, `atendido`, `cancelado`.
+
 ## API Gateway
 
-El gateway (`gateway/`) recibe todas las peticiones y las reenvía al servicio según la ruta, con el mismo método y cuerpo:
+El gateway (`gateway/`) recibe todas las peticiones y las reenvía al servicio según la ruta, con el mismo método, parámetros y cuerpo:
 
 | Ruta | Servicio |
 |---|---|
@@ -782,7 +860,95 @@ El gateway (`gateway/`) recibe todas las peticiones y las reenvía al servicio s
 | `/turnos...` | Turnos |
 | `/notificaciones...` | Notificaciones |
 
-Si el servicio no responde en 5 segundos devuelve 504; si no se puede conectar, 503.
+Si el servicio no responde en 5 segundos devuelve 504; si no se puede conectar, 503. También agrega los encabezados CORS para que el navegador pueda llamarlo desde Home.
+
+## Endpoints actualizados
+
+Todas las rutas se consumen a través del gateway: `http://localhost:5000`. Las respuestas de error tienen la forma `{"mensaje": "..."}`.
+
+- **PUT** reemplaza el recurso y exige todos los campos.
+- **PATCH** modifica solo los campos enviados.
+
+### Clientes
+
+| Método | Endpoint | Descripción | Respuestas |
+|---|---|---|---|
+| GET | `/clientes` | Lista los clientes. Acepta `?documento=` para buscar por documento. | 200 |
+| GET | `/clientes/{id}` | Consulta un cliente. | 200, 404 |
+| POST | `/clientes` | Crea un cliente. Obligatorios: `nombre`, `documento`; opcional: `telefono`. | 201, 400, 409 (documento repetido) |
+| PUT | `/clientes/{id}` | Actualiza `nombre`, `documento` y `telefono`. | 200, 400, 404, 409 |
+| PATCH | `/clientes/{id}` | Modifica los campos enviados. | 200, 404, 409 |
+| DELETE | `/clientes/{id}` | Elimina un cliente. | 200, 404 |
+| POST | `/clientes/{id}/solicitar-turno` | Pide un turno a Turnos. Cuerpo opcional: `{"tramite": "credito"}`. | 201, 404, 502, 503, 504 |
+| GET | `/clientes/circuito/turnos` | Estado del Circuit Breaker hacia Turnos. | 200 |
+
+### Asesores
+
+| Método | Endpoint | Descripción | Respuestas |
+|---|---|---|---|
+| GET | `/asesores` | Lista los asesores. | 200 |
+| GET | `/asesores/{id}` | Consulta un asesor. | 200, 404 |
+| POST | `/asesores` | Crea un asesor. Obligatorios: `nombre`, `ventanilla`; opcional: `estado`. | 201, 400 |
+| PUT | `/asesores/{id}` | Actualiza `nombre`, `ventanilla` y `estado`. | 200, 400, 404 |
+| PATCH | `/asesores/{id}` | Modifica los campos enviados. | 200, 404 |
+| DELETE | `/asesores/{id}` | Elimina un asesor. | 200, 404 |
+| PUT | `/asesores/{id}/atender-turno/{turno_id}` | Toma el turno, marca al asesor `ocupado` y notifica al cliente. | 200, 404, 409 (asesor ocupado), 502, 503, 504 |
+| PUT | `/asesores/{id}/finalizar-turno/{turno_id}` | Marca el turno `atendido` y deja al asesor `disponible`. | 200, 404, 502, 503, 504 |
+| GET | `/asesores/circuito/turnos` | Estado del Circuit Breaker hacia Turnos. | 200 |
+| GET | `/asesores/circuito/notificaciones` | Estado del Circuit Breaker hacia Notificaciones. | 200 |
+
+### Turnos
+
+| Método | Endpoint | Descripción | Respuestas |
+|---|---|---|---|
+| GET | `/turnos` | Lista los turnos. Acepta `?estado=` o `?cliente_id=`. | 200 |
+| GET | `/turnos/{id}` | Consulta un turno. | 200, 404 |
+| POST | `/turnos` | Crea un turno. Obligatorio: `cliente_id`; opcional: `tramite` (por defecto `general`). Devuelve `id` y `codigo`. | 201, 400, 404, 502, 503, 504 |
+| PUT | `/turnos/{id}` | Actualiza `tramite`, `estado` y `asesor_id`. | 200, 400, 404 |
+| PATCH | `/turnos/{id}` | Modifica los campos enviados. | 200, 400 (estado inválido), 404 |
+| DELETE | `/turnos/{id}` | Elimina un turno. | 200, 404 |
+| GET | `/turnos/{id}/detalle` | Turno con los datos del cliente y del asesor. | 200, 404, 502, 503, 504 |
+| GET | `/turnos/circuito/clientes` | Estado del Circuit Breaker hacia Clientes. | 200 |
+| GET | `/turnos/circuito/asesores` | Estado del Circuit Breaker hacia Asesores. | 200 |
+
+### Notificaciones
+
+| Método | Endpoint | Descripción | Respuestas |
+|---|---|---|---|
+| GET | `/notificaciones` | Lista las notificaciones. Acepta `?turno_id=`. | 200 |
+| GET | `/notificaciones/{id}` | Consulta una notificación. | 200, 404 |
+| POST | `/notificaciones` | Crea el aviso de un turno. Obligatorio: `turno_id`. | 201, 400, 404, 409 (sin ventanilla), 502, 503, 504 |
+| PUT | `/notificaciones/{id}` | Actualiza `turno_id`, `texto` y `estado`. | 200, 400, 404 |
+| PATCH | `/notificaciones/{id}` | Modifica `texto` y/o `estado` (`enviada` o `leida`). | 200, 400, 404 |
+| DELETE | `/notificaciones/{id}` | Elimina una notificación. | 200, 404 |
+| GET | `/notificaciones/circuito/turnos` | Estado del Circuit Breaker hacia Turnos. | 200 |
+
+## Tolerancia a fallos
+
+### Timeout
+
+Toda llamada HTTP entre servicios tiene un tiempo máximo de espera (por defecto 2 segundos, configurable con `CLIENTES_TIMEOUT`, `ASESORES_TIMEOUT`, `TURNOS_TIMEOUT` y `NOTIFICACIONES_TIMEOUT`). Si se supera, el servicio responde `504` en lugar de quedarse esperando. El gateway usa un timeout de 5 segundos.
+
+### Circuit Breaker
+
+Se implementó con la librería `pybreaker`. Cada servicio tiene un circuito por cada servicio al que llama:
+
+| Servicio | Circuitos |
+|---|---|
+| Clientes | → Turnos |
+| Turnos | → Clientes, → Asesores |
+| Asesores | → Turnos, → Notificaciones |
+| Notificaciones | → Turnos |
+
+- **CLOSED:** las llamadas pasan normalmente.
+- **OPEN:** después de `CB_MAX_FALLOS` fallos seguidos (por defecto 3), el circuito se abre y las llamadas se rechazan de inmediato con `503 "Circuito abierto: ... no disponible"`, sin esperar al servicio caído.
+- **HALF-OPEN:** pasados `CB_RECUPERACION` segundos (por defecto 30), se deja pasar una llamada de prueba; si funciona, el circuito se cierra de nuevo.
+
+Cuenta como fallo un error de conexión, un timeout o una respuesta `5xx`. El estado de cada circuito se puede consultar en las rutas `/.../circuito/...`.
+
+### Degradación controlada
+
+Si Notificaciones falla al atender un turno, la atención **no se cancela**: el asesor igual toma el turno y la respuesta indica `"notificacion": "pendiente: ..."`.
 
 ## Home
 
@@ -792,7 +958,7 @@ Las acciones del asesor (llamar y finalizar turno) se hacen con Thunder Client o
 
 ## Configuración (`.env`)
 
-Un solo `.env` en la raíz.
+Un solo `.env` en la raíz (`Bancofinal-Q-bank/.env`). No se sube al repositorio porque contiene contraseñas.
 
 Se define por servicio: `<SERVICIO>_DB_HOST`, `_DB_NAME`, `_DB_PASSWORD` y `_MYSQL_HOST_PORT`.
 
@@ -800,10 +966,126 @@ Comunes: `DB_PORT=3306`, `DB_USER=root`, las URLs de los servicios, los timeouts
 
 El compose entrega a cada servicio sus variables `DB_*`.
 
+Ejemplo (cambiar las contraseñas):
+
+```env
+DB_PORT=3306
+DB_USER=root
+
+CLIENTES_DB_HOST=mysql_clientes
+CLIENTES_DB_NAME=clientes_db
+CLIENTES_DB_PASSWORD=cambiar
+CLIENTES_MYSQL_HOST_PORT=3307
+
+ASESORES_DB_HOST=mysql_asesores
+ASESORES_DB_NAME=asesores_db
+ASESORES_DB_PASSWORD=cambiar
+ASESORES_MYSQL_HOST_PORT=3308
+
+TURNOS_DB_HOST=mysql_turnos
+TURNOS_DB_NAME=turnos_db
+TURNOS_DB_PASSWORD=cambiar
+TURNOS_MYSQL_HOST_PORT=3309
+
+NOTIFICACIONES_DB_HOST=mysql_notificaciones
+NOTIFICACIONES_DB_NAME=notificaciones_db
+NOTIFICACIONES_DB_PASSWORD=cambiar
+NOTIFICACIONES_MYSQL_HOST_PORT=3310
+
+CLIENTES_URL=http://clientes:5000
+ASESORES_URL=http://asesores:5000
+TURNOS_URL=http://turnos:5000
+NOTIFICACIONES_URL=http://notificaciones:5000
+
+CLIENTES_TIMEOUT=2
+ASESORES_TIMEOUT=2
+TURNOS_TIMEOUT=2
+NOTIFICACIONES_TIMEOUT=2
+
+CB_MAX_FALLOS=3
+CB_RECUPERACION=30
+```
+
+## Bases de datos
+
+Las tablas y los datos de ejemplo se crean automáticamente la primera vez que arranca cada contenedor MySQL: los scripts de `bases_datos/` se montan en `/docker-entrypoint-initdb.d/`. Ya no es necesario crearlas por consola.
+
+| Base de datos | Contenedor | Volumen | Datos de ejemplo |
+|---|---|---|---|
+| `clientes_db` | `mysql_clientes` | `clientes_data` | Fernando (1001), Elizabeth (1002) |
+| `asesores_db` | `mysql_asesores` | `asesores_data` | Valeria (ventanilla 1), Alix (ventanilla 2) |
+| `turnos_db` | `mysql_turnos` | `turnos_data` | T-1 (general), T-2 (crédito) |
+| `notificaciones_db` | `mysql_notificaciones` | `notificaciones_data` | — |
+
+Los scripts solo se ejecutan cuando el volumen está vacío. Para volver a cargar los datos iniciales: `docker compose down -v`.
+
+## Cómo ejecutar
+
+```bash
+cd Bancofinal-Q-bank
+# crear el archivo .env (ver ejemplo arriba)
+docker compose up --build
+```
+
+| Componente | URL |
+|---|---|
+| Home | http://localhost:8080 |
+| Gateway | http://localhost:5000 |
+| Clientes | http://localhost:5001 |
+| Asesores | http://localhost:5002 |
+| Turnos | http://localhost:5003 |
+| Notificaciones | http://localhost:5004 |
+
 ## Pruebas
 
+Las pruebas se hicieron con Thunder Client / Postman contra el gateway (`http://localhost:5000`), usando los datos de ejemplo.
 
+### Flujo normal
+
+| # | Petición | Cuerpo | Resultado esperado |
+|---|---|---|---|
+| 1 | `POST /clientes` | `{"nombre": "Ana", "documento": "1003", "telefono": "3007778899"}` | 201, `{"mensaje": "Cliente creado", "id": 3}` |
+| 2 | `POST /clientes` (mismo documento) | `{"nombre": "Ana", "documento": "1003"}` | 409, documento ya registrado |
+| 3 | `POST /clientes/1/solicitar-turno` | `{"tramite": "credito"}` | 201, turno con su `codigo` (ej. `T-3`) |
+| 4 | `GET /turnos?estado=en_espera` | — | 200, lista de turnos en espera |
+| 5 | `PUT /asesores/1/atender-turno/3` | — | 200, `{"mensaje": "Turno en atención", "notificacion": "enviada"}` |
+| 6 | `PUT /asesores/1/atender-turno/1` | — | 409, el asesor ya está atendiendo un turno |
+| 7 | `GET /notificaciones?turno_id=3` | — | 200, `"Turno T-3 - Fernando: diríjase a la ventanilla 1"` |
+| 8 | `GET /turnos/3/detalle` | — | 200, turno + cliente + asesor |
+| 9 | `PUT /asesores/1/finalizar-turno/3` | — | 200, turno `atendido` y asesor `disponible` |
+| 10 | `PATCH /turnos/2` | `{"estado": "pendiente"}` | 400, estado inválido |
+| 11 | `POST /turnos` | `{"cliente_id": 99}` | 404, cliente no encontrado |
+
+### Fallos y Circuit Breaker
+
+| # | Escenario | Cómo se prueba | Resultado esperado |
+|---|---|---|---|
+| 1 | Turnos caído | `docker compose stop turnos` y `POST /clientes/1/solicitar-turno` | 503, no se pudo conectar con el servicio de turnos |
+| 2 | Circuito abierto | Repetir la petición anterior 3 veces y consultar `GET /clientes/circuito/turnos` | `"estado": "OPEN"`; las siguientes llamadas responden de inmediato `503 Circuito abierto` |
+| 3 | Recuperación | `docker compose start turnos`, esperar 30 s y volver a pedir el turno | 201; el circuito vuelve a `CLOSED` |
+| 4 | Notificaciones caído | `docker compose stop notificaciones` y atender un turno | 200, el turno queda `en_atencion` con `"notificacion": "pendiente: ..."` |
+| 5 | Clientes caído | `docker compose stop clientes` y `GET /turnos/1/detalle` | 503; `GET /turnos` sigue funcionando porque no depende de Clientes |
+| 6 | Servicio caído desde el gateway | `docker compose stop asesores` y `GET /asesores` | 503, no fue posible conectar con el servicio destino |
+
+## Cambios respecto al segundo avance
+
+- Se agregaron el servicio de **Notificaciones** con su base `notificaciones_db`, el **API Gateway** y la interfaz **Home** conectada al gateway.
+- Los servicios escuchan en el puerto interno `5000`; afuera se publican en 5001–5004.
+- El código del turno ahora es `T-{id}` (T-1, T-2…), en lugar de `T-001`.
+- Los errores se devuelven como `{"mensaje": "..."}`.
+- Se agregó `PATCH` para modificaciones parciales; `PUT` exige todos los campos.
+- Asesores usa `PATCH /turnos/{id}` para atender y finalizar turnos, y se agregó `finalizar-turno`.
+- Las tablas se crean automáticamente con los scripts de `bases_datos/`.
+- Un solo `.env` en la raíz para todos los servicios.
+- Timeout y Circuit Breaker en todas las llamadas entre servicios.
 
 ## Estado actual
 
 **Terminado:** los 4 servicios con CRUD, bases independientes con volumen, comunicación HTTP, Timeout, Circuit Breaker, gateway, home y Docker Compose.
+
+**Mejoras futuras:**
+
+- Prioridad de turnos (atención preferencial) y asignación automática al asesor disponible.
+- Autenticación y roles (cliente, asesor, administrador).
+- Mensajería asíncrona (por ejemplo, RabbitMQ) para reintentar las notificaciones pendientes.
+- Pantalla del asesor en Home para llamar y finalizar turnos sin usar Postman.
